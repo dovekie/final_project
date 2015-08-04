@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>Birds</h2>
+
+
+	{% for order in orders %}
+		<h3>{{ order.order }}</h3>
+		<ul>
+			{% for bird in birds %}
+				{% if bird.order == order.order %}
+					<li><i>{{ bird.common_name }}</i>: {{ bird.sci_name }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	{% endfor %}
+
+{% endblock %}

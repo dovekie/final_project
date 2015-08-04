@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+    <link rel="stylesheet"
+          href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css"/>
+    <!-- <link rel="stylesheet" href="/static/parallax.css"/> -->
+    <title>BirdGrip</title>
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-static-top">
+    <div class="container">
+
+        <div class="navbar-header">
+            <!-- <img src="/static/img/ubermelon-logo.png"> -->
+            <a class="navbar-brand" href="/">BirdGrip</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/search">
+                        Search
+                    </a>
+                </li>
+                <li>
+                  {% if 'login' in session.keys() %}
+                    <a href="/logout">Welcome, {{ session["first_name"] }}. Logout?</a>
+                  {% else %}
+                    <a href="/login">Log In</a></li>
+                  {% endif %}
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+  <div class="parallax">
+<!--     <div id="group1" class="parallax__group">
+      <div class="parallax__layer parallax__layer--base">
+        <div class="title">Bird Grip</div>
+        <img src="static/bluebird.jpg">
+      </div>
+    </div>
+    <div id="group2" class="parallax__group">
+      <div class="parallax__layer parallax__layer--base">
+        <div class="title">Base Layer</div>  
+      </div>
+      <div class="parallax__layer parallax__layer--back">
+        <div class="title">Background Layer</div> -->
+        <!-- This is where the main content goes. -->
+        {% block body %}
+        PAGE GOES HERE
+        {% endblock %}<!-- 
+      </div>
+    </div> -->
+  </div>
+
+
+
+</div>
+
+</body>
+</html>

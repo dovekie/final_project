@@ -1,12 +1,99 @@
-import sqlite3
+"""Models and database functions """
 
-class Bird(object):
-	""" I'm a bird. I have a unique taxon code, a scientific name, and a common name."""
+from flask_sqlalchemy import SQLAlchemy
 
-	def __init__(self, taxon_id, species_name, common_name):
-		self.taxon_id = taxon_id
-		self.species_name = species_name
-		self.common_name = common_name
+# This is the connection to the SQLite database; we're getting this through
+# the Flask-SQLAlchemy helper library. On this, we can find the `session`
+# object, where we do most of our interactions (like committing, etc.)
 
-	@classmethod
-	def get_birds_from_ebird(cls):
+db = SQLAlchemy()
+
+
+##############################################################################
+# Model definitions
+
+class User(db.Model):
+    """User of the birdwatch website"""
+
+    __tablename__ = "users"
+
+    user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    username = db.Column(db.String(64), nullable=False, unique=True)
+    email = db.Column(db.String(64), nullable=True, unique=True)
+    password = db.Column(db.String(64), nullable=True)
+
+    #location = db.Column(db.String(15), nullable=True)
+
+    #UniqueConstraint('username', 'email', name='unique_user') # FIXME
+
+    def __repr__(self):
+        """Provide helpful information representation when printed!"""
+
+        return "<User user_id = %s email = %s username = %s>" %(self.user_id, self.email, self.username)
+
+
+class Bird(db.Model):
+    """Birds from eBird"""
+
+    __tablename__ = "birds"
+
+    taxon_id = db.Column(db.String(100), primary_key=True)
+    common_name = db.Column(db.String(100), nullable=True)
+    sci_name = db.Column(db.String(100), nullable=False)
+    species = db.Column(db.String(100), nullable=False)
+    genus = db.Column(db.String(100), nullable=False) 
+    family = db.Column(db.String(100), nullable=False)
+    order = db.Column(db.String(100), nullable=False)
+    
+    #location data follows. Some of these beeps might not have any!
+    region = db.Column(db.String(100), nullable=True)
+    subregion = db.Column(db.String(100), nullable=True)
+    nonbreeding_region = db.Column(db.String(100), nullable=True)
+
+
+    def __repr__(self):
+        """Provide helpful information representation when printed!"""
+
+        return "<TaxonID = %s species = %s>" %(self.taxon_id, self.sci_name)
+
+class Observation(db.Model):
+    """User observations"""
+
+    __tablename__ = "observations"
+
+    obs_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    bird_id = db.Column(db.Integer, db.ForeignKey('birds.taxon_id'), nullable=False)
+    timestamp = db.Column(db.Integer, nullable=False)
+    #location = db.Column(something)
+
+    # Define relationship to users
+    user = db.relationship("User", backref=db.backref("observations", order_by=Bird.taxon_id))
+
+    # Define relationship to birds
+    bird = db.relationship("Bird", backref=db.backref("observations", order_by=Bird.taxon_id))
+
+    def __repr__(self):
+        """Provide helpful information representation when printed!"""
+
+        return "<Observation user_id = %s taxon_id = %s>" %(self.user_id, self.taxon_id)
+
+##############################################################################
+# Helper functions
+
+def connect_to_db(app):
+    """Connect the database to our Flask app."""
+
+    # Configure to use our SQLite database
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///birdwatch.db'
+    db.app = app
+    db.init_app(app)
+
+
+if __name__ == "__main__":
+    # As a convenience, if we run this module interactively, it will leave
+    # you in a state of being able to work with the database directly.
+
+    from server import app 
+    connect_to_db(app)
+    print "Connected to DB."
