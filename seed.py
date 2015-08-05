@@ -14,7 +14,7 @@ def load_birds():
 
     # json_birds = ebird_response.json()
 
-    bird_string = open("tests/bird_data_sample.txt").read()
+    bird_string = open("tests/bird_data_sample_expanded.txt").read()
 
     json_birds = json.loads(bird_string)
 
