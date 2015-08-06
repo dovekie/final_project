@@ -9,46 +9,45 @@ def load_birds():
     """Load bird species data from eBird into database.
 
     """
-    # This part gets the full ebird json. commented out for testing purposes.
+    # These two lines get the full ebird json. commented out for testing purposes.
     # ebird_response = requests.get("http://ebird.org/ws1.1/ref/taxa/ebird?cat=species&fmt=json&locale=en_US")
-
     # json_birds = ebird_response.json()
 
-    bird_string = open("tests/bird_data_sample_expanded.txt").read()
-
+    bird_string = open("tests/ebird_complete.json").read() # these two lines are fake ebird input for testing
     json_birds = json.loads(bird_string)
 
-    for bird in json_birds:
+    ebirds = {}
+
+    for bird in json_birds:  # make a dict of scientific names: taxonIDs
         bird_id = bird["taxonID"]
-        binom = bird["sciName"]     # get the bird's binomial from eBird
+        common_name = bird["comName"]
+        binom = bird["sciName"]
+        ebirds[binom] = (bird_id, common_name)
 
-        faircloth_url = "http://birds.faircloth-lab.org/api/v1/species/scientific/" + binom         # build a url for querying Faircloth's API
-        faircloth_request = requests.get(faircloth_url)         # the raw response object from Faircloth
-        bird_json = faircloth_request.json()        # JSON data out of the request object
-        bird_records = bird_json["records"][0]      # just the good stuff. Dict key "records" has a list as a value. Get the first item in the list.
+    # These two lines get the full faircloth json. commented out for testing purposes.
+    # faircloth_response = requests.get("http://birds.faircloth-lab.org/api/v1/species/?offset=0&limit=20000")
+    # faircloth_birds = faircloth_response.json()
 
-        #done processing. Now to get data!
-        species = bird_records["species"]
-        genus = bird_records["genus"]
-        family = bird_records["family"]
-        order = bird_records["order"].title() # dunno why this is uppercase. Fixing that...
-        region = bird_records["breed_region"]
-        subregion = bird_records["breed_subregion"]
-        nonbreeding = bird_records["nonbreed"]
+    faircloth_string = open("tests/faircloth_complete.json").read() # similar to above; fake faircloth input for testing
+    faircloth_data = json.loads(faircloth_string)
+    faircloth_birds = faircloth_data["records"]
 
-        bird = Bird(taxon_id = bird["taxonID"],
-                    common_name = bird["comName"],
-                    sci_name = bird["sciName"],
-                    species = bird_records["species"],
-                    genus = bird_records["genus"],
-                    family = bird_records["family"],
-                    order = bird_records["order"].title(),
-                    region = bird_records["breed_region"],
-                    subregion = bird_records["breed_subregion"],
-                    nonbreeding_region = bird_records["nonbreed"]
-                    )
-        db.session.add(bird)
+    for bird in faircloth_birds:
+        if bird["binomial"] in ebirds:
+            binomial = bird["binomial"]
 
+            new_bird = Bird(taxon_id = ebirds[binomial][0],
+                            common_name = ebirds[binomial][1],
+                            sci_name = bird["binomial"],
+                            species = bird["species"],
+                            genus = bird["genus"],
+                            family = bird["family"],
+                            order = bird["order"].title(),
+                            region = bird["breed_region"],
+                            subregion = bird["breed_subregion"],
+                            nonbreeding_region = bird["nonbreed"]
+                            )
+            db.session.add(new_bird)
     db.session.commit()
 
 if __name__ == "__main__":

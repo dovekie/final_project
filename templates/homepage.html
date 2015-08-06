@@ -7,13 +7,19 @@
 
 	{% for order in orders %}
 		<h3>{{ order.order }}</h3>
-		<ul>
-			{% for bird in birds %}
-				{% if bird.order == order.order %}
-					<li><i>{{ bird.common_name }}</i>: {{ bird.sci_name }}</li>
-				{% endif %}
-			{% endfor %}
-		</ul>
+		{% for family in families %}
+			{% if family.order == order.order %}
+			<h4>{{family.family}}</h4>
+				<ul>
+					{% for bird in birds %}
+						{% if bird.family == family.family %}
+							<li><i>{{ bird.common_name }}</i>: {{ bird.sci_name }}</li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			{% endif %}
+		{% endfor %}
+		
 	{% endfor %}
 
 {% endblock %}
