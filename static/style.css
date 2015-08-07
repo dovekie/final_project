@@ -1,0 +1,30 @@
+/*css is awesome!*/
+
+.navbar {
+	position: fixed;
+}
+
+#main_page_body {
+	padding-top: 70px;
+}
+
+.highlight {
+	color: blue;
+}
+
+#bird_counter {
+	color: white;
+
+}
+
+.taxon_family {
+	text-indent: 1em;
+}
+
+.taxon_species {
+	list-style-type: none;
+}
+
+.sci_name_span {
+	font-style: italic;
+}

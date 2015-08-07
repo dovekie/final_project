@@ -21,6 +21,7 @@ class User(db.Model):
     username = db.Column(db.String(64), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=True, unique=True)
     password = db.Column(db.String(64), nullable=True)
+    bird_count = db.Column(db.Integer, nullable=True)
 
     #location = db.Column(db.String(15), nullable=True)
 

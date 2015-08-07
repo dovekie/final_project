@@ -3,11 +3,20 @@
 {% block body %}
 <h2>Select Search Terms:</h2>
 <form action="/search" class="form-search" method="POST">
+  <label>Select a kind of bird:
+    <select name="select_spuh">
+        <option value=""></option>
+        {% for key, value in spuh.iteritems() %}
+          <option value="{{key}}">{{ value }}</option>
+        {% endfor %}
+    </select>
+  </label>
+  <p>or</p>
 	<label>Select an order:
 		<select name="select_order">
-  			<option value=""></option>
-			{% for order in orders %}
-  			<option value="{{order.order}}">{{order.order}}</option>
+  		  <option value=""></option>
+        {% for order in orders %}
+  		  	<option value="{{order.order}}">{{order.order}}</option>
   			{% endfor %}
   		</select>
   	</label>
@@ -16,7 +25,7 @@
   		<select name="select_family">
   			<option value=""></option>
 	  		{% for family in families %}
-	  		<option value="{{family.family}}">{{family.family}}</option>
+	  	  	<option value="{{family.family}}">{{family.family}}</option>
 	  		{% endfor %}
   		</select>
  	</label>
@@ -25,7 +34,7 @@
   		<select name="select_region">
   			<option value=""></option>
 	  		{% for region in regions %}
-	  		<option value="{{region.region}}">{{region.region}}</option>
+	  	  	<option value="{{region.region}}">{{region.region}}</option>
 	  		{% endfor %}
   		</select>
   </label>

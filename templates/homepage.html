@@ -1,19 +1,28 @@
 {% extends 'base.html' %}
 
+{% block head %}
+
+{% endblock %}
+
 {% block body %}
+
 
 <h2>Birds</h2>
 
 
 	{% for order in orders %}
-		<h3>{{ order.order }}</h3>
+		<h3 class="taxon_order" name="{{order.order}}">{{ order.order }}</h3>
 		{% for family in families %}
 			{% if family.order == order.order %}
-			<h4>{{family.family}}</h4>
+			<h4 class="taxon_family" name="{{family.family}}">{{family.family}}</h4>
 				<ul>
 					{% for bird in birds %}
 						{% if bird.family == family.family %}
-							<li><i>{{ bird.common_name }}</i>: {{ bird.sci_name }}</li>
+							<li class="taxon_species" name="{{bird.taxon_id}}">
+								<p class="species_span">
+									<span class="common_name_span">{{ bird.common_name }}</span>: <span class="sci_name_span">{{ bird.sci_name }}</span>
+								</p>
+							</li>
 						{% endif %}
 					{% endfor %}
 				</ul>
@@ -21,5 +30,6 @@
 		{% endfor %}
 		
 	{% endfor %}
+
 
 {% endblock %}
