@@ -63,28 +63,35 @@ def index():
 
     Displays a dynamic list of bird species organized by order and family
     """
+    try:
+        this_user = session['username']
+    except KeyError:
+        this_user = "guest"
 
-    orders = Bird.query.order_by(Bird.taxon_id).group_by(Bird.order).all()
-    families = Bird.query.order_by(Bird.taxon_id).group_by(Bird.family).all()
-    birds = Bird.query.order_by(Bird.taxon_id).all()
-    
+    print this_user
+
+    if this_user is not "guest":
+        this_user_id = User.query.filter(User.username == session['username']).one().user_id
+        print this_user_id
+
+        obs_list_clean = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
+        print obs_list_clean
+
+    # get all orders
+    orders = db.session.query(Bird.order).order_by(Bird.taxon_id).group_by(Bird.order).all()
+
+    # cleaning up the one-item tuples. This should be a list comprehension.
+    orders_list = []
     for order in orders:
-        print order.order
+        orders_list.append(order[0])
 
-    # bird_output_list = []
+    # get all families, and all orders for all families
+    families = db.session.query(Bird.family, Bird.order).order_by(Bird.taxon_id).group_by(Bird.family).all()
 
-    # for bird in birds:
-    # 	taxon_id = bird.taxon_id
-    # 	sci_name = bird.sci_name
-    #     family = bird.family
-    #     order = bird.order
-    # 	com_name = bird.common_name
+    # get all bird objects
+    birds = Bird.query.order_by(Bird.taxon_id).all()
 
-    # 	bird_output_list.append((taxon_id, sci_name, com_name, family, order))
-
-
-
-    return render_template("homepage.html", orders=orders, families = families, birds=birds)
+    return render_template("homepage.html", orders=orders_list, families = families, birds=birds, obs=obs_list_clean)
 
 @app.route('/search', methods=["GET"])
 def search():
@@ -199,16 +206,51 @@ def logout():
     return redirect('/')
 
 
+@app.route('/add_obs', methods=["POST"])
+def add_obs():
+    
+    try:
+        this_user = session['username']
+    except KeyError:
+        this_user = "guest"
+
+    print "this username:", this_user
+
+    if this_user is not "guest":
+        user_id = User.query.filter(User.username == session['username']).one().user_id
+
+        print "this user_id", user_id
+        
+        count = request.form.get('count')
+        bird_id = request.form.get('bird')
+
+        obs = Observation.query.filter(Observation.bird_id == bird_id, Observation.user_id == user_id).first()
+
+        if obs:
+            print "deleting", obs
+            db.session.delete(obs)
+            db.session.commit()
+        else:
+            print "wow new obs"
+            print "user id and bird id", user_id, bird_id
+            new_obs = Observation(  user_id = user_id,
+                                    bird_id = bird_id,
+                                    timestamp = "0")
+            db.session.add(new_obs)
+            db.session.commit()
+
+
+    return "Victory"
 
 # Stuff I didn't write that makes the app go.
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
     # that we invoke the DebugToolbarExtension
-    app.debug = True
+    # app.debug = True
 
     connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
     app.run()

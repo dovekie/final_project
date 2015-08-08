@@ -11,5 +11,14 @@ $( "p" ).click(function() {
 		happycount--;
 	    console.log("happy = " + happycount);
 		}
+
 	    $("#bird_counter").html(happycount);
+
+	    $.ajax("/add_obs", {
+	    	method: "POST",
+            datatype:"json",
+	    	data: {'count': happycount, 'bird': $(this).attr("id")}
+	    }).done(function() {
+  			console.log("Victory!");
+		});
 	  });

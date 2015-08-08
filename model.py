@@ -77,7 +77,7 @@ class Observation(db.Model):
     def __repr__(self):
         """Provide helpful information representation when printed!"""
 
-        return "<Observation user_id = %s taxon_id = %s>" %(self.user_id, self.taxon_id)
+        return "<Observation user_id = %s taxon_id = %s>" %(self.user_id, self.bird_id)
 
 ##############################################################################
 # Helper functions
