@@ -6,9 +6,11 @@
 
 {% block body %}
 
-
 <h2>Birds</h2>
 
+{% if birds == [] %}
+<h3>No birds found. <a href="/search">Search again?</a></h3>
+{% else %}
 
 	{% for order in orders %}
 		<h3 class="taxon_order" id="{{order}}">{{ order }}</h3>
@@ -20,7 +22,8 @@
 						{% if bird.family == family[0] %}
 							<li class="taxon_species">
 								<p class="species_span" id="{{bird.taxon_id}}">
-									<span class="common_name_span">{{ bird.common_name }}</span>: <span class="sci_name_span">{{ bird.sci_name }}</span>
+									<span class="common_name_span">{{ bird.common_name }}</span>: 
+									<span class="sci_name_span">{{ bird.sci_name }}</span>
 								</p>
 							</li>
 						{% endif %}
@@ -30,6 +33,5 @@
 		{% endfor %}
 		
 	{% endfor %}
-
-
+{% endif %}
 {% endblock %}

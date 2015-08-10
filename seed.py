@@ -18,7 +18,7 @@ def load_birds():
 
     ebirds = {}
 
-    for bird in json_birds:  # make a dict of scientific names: taxonIDs
+    for bird in json_birds:  # make a dict with the format: ebird[scientific name] = (taxonID, common name)
         bird_id = bird["taxonID"]
         common_name = bird["comName"]
         binom = bird["sciName"]
@@ -32,6 +32,8 @@ def load_birds():
     faircloth_data = json.loads(faircloth_string)
     faircloth_birds = faircloth_data["records"]
 
+
+    # match the faircloth data to the ebird data, and use both to create a new row in the birds table.
     for bird in faircloth_birds:
         if bird["binomial"] in ebirds:
             binomial = bird["binomial"]

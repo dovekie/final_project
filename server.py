@@ -3,7 +3,7 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask, render_template, redirect, request, flash, session
+from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import User, Bird, Observation, connect_to_db, db
@@ -14,7 +14,7 @@ app.secret_key = "TINAMOU"
 
 app.jinja_env.undefined = StrictUndefined
 
-# Housekeeping over. Now for routes.
+# common names for bird orders
 SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
                     'Rheiformes' : "Rheas",
                     'Casuariiformes' : "Cassowaries",
@@ -56,6 +56,28 @@ SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
                     'Piciformes' : "Woodpeckers",
                     'Passeriformes' : "Songbirds"}
 
+# rationalizing location codes
+REGION_CODES = { "NA" : "North America",
+              "MA" : "Middle America",
+              "SA" : "South America",
+              "LA" : "Latin America",
+              "AF" : "Africa",
+              "EU" : "Eurasia",
+              "OR" : "South Asia",
+              "AU" : "Australasia",
+              "AO" : "Atlantic Ocean",
+              "PO" : "Pacific Ocean",
+              "IO" : "Indian Ocean",
+              "TrO": "Tropical Ocean",
+              "TO" : "Temperate Ocean",
+              "NO" : "Northern Ocean",
+              "SO" : "Southern Ocean",
+              "AN" : "Antarctica",
+              "So. Cone" : "Southern Cone"
+}
+
+# Housekeeping over. Now for routes.
+
 @app.route('/')
 def index():
     """
@@ -63,35 +85,42 @@ def index():
 
     Displays a dynamic list of bird species organized by order and family
     """
-    try:
-        this_user = session['username']
-    except KeyError:
-        this_user = "guest"
-
-    print this_user
-
-    if this_user is not "guest":
-        this_user_id = User.query.filter(User.username == session['username']).one().user_id
-        print this_user_id
-
-        obs_list_clean = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
-        print obs_list_clean
 
     # get all orders
     orders = db.session.query(Bird.order).order_by(Bird.taxon_id).group_by(Bird.order).all()
 
-    # cleaning up the one-item tuples. This should be a list comprehension.
-    orders_list = []
-    for order in orders:
-        orders_list.append(order[0])
-
+    # cleaning up the one-item tuples.
+    orders_list = [order[0] for order in orders]
+    
     # get all families, and all orders for all families
     families = db.session.query(Bird.family, Bird.order).order_by(Bird.taxon_id).group_by(Bird.family).all()
 
     # get all bird objects
     birds = Bird.query.order_by(Bird.taxon_id).all()
 
-    return render_template("homepage.html", orders=orders_list, families = families, birds=birds, obs=obs_list_clean)
+    return render_template("homepage.html", orders=orders_list, families = families, birds=birds)
+
+@app.route('/mark_user_birds', methods=["GET"])
+def mark_birds():
+    
+    # This will return None if the user is not logged in
+    this_user = session.get('username')
+
+    if this_user is not None:
+        this_user_id = User.query.filter(User.username == session['username']).one().user_id
+        print this_user_id
+
+        obs_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
+        print len(obs_list)
+        #clean up one-item tuples
+        obs_dict = {obs[0]: '' for obs in obs_list}
+        print obs_dict
+        obs_json = jsonify(obs_dict)
+        print obs_json
+
+        return obs_json
+    else:
+        return {}  # FIXME
 
 @app.route('/search', methods=["GET"])
 def search():
@@ -103,7 +132,7 @@ def search():
     spuh = SPUH_EQUIVALENTS
     orders = Bird.query.order_by(Bird.taxon_id).group_by(Bird.order).all()
     families = Bird.query.order_by(Bird.taxon_id).group_by(Bird.family).all()
-    regions = Bird.query.order_by(Bird.taxon_id).group_by(Bird.region).all()
+    regions = REGION_CODES
 
     return render_template("search.html", orders=orders, families=families, regions=regions, spuh=spuh)
 
@@ -114,35 +143,66 @@ def search_results():
 
     Take search parameters from the user and queries the database
     """
+    bird_limit_param = request.form.get("which_birds")
     spuh_param = request.form.get("select_spuh")
     order_param = request.form.get("select_order")
     family_param = request.form.get("select_family")
     region_param = request.form.get("select_region")
+    other_param = request.form.get("fuzzy")
 
+    q = Bird.query
+
+    if bird_limit_param:
+        # if bird_limit_param == "all_birds":
+            # pass
+        # elif bird_limit_param == "my_birds":
+            # only show birds I have observed
+        # elif bird_limit_param == "not_my_birds":
+            # only show birds I have not observed
+        pass
+    else:
+        pass
+
+        # right now, "spuh" is just another way of picking an order
     if spuh_param:
+        print "spuh: ", spuh_param, type(spuh_param)
         order_param = spuh_param
 
-    if order_param:
-        print order_param, type(order_param)
-        raw_orders = Bird.query.order_by(Bird.taxon_id).filter(Bird.order == order_param)
-        orders = raw_orders.group_by(Bird.order).all()
-    else:
-        orders = Bird.query.order_by(Bird.taxon_id).group_by(Bird.order).all()
-    
+        # filter the query by order, if the user has selected an order parameter
+    if order_param: 
+        print "order ", order_param, type(order_param)
+        q = q.filter_by(order = order_param)
+
     if family_param:
-        print family_param, type(family_param)
-        raw_families = Bird.query.order_by(Bird.taxon_id).filter(Bird.family == family_param)
-        families = raw_families.group_by(Bird.family).all()
-    else:
-        families = Bird.query.order_by(Bird.taxon_id).group_by(Bird.family).all()
+        q = q.filter_by(family = family_param)
 
+        # search inside the region field
     if region_param:
-        print region_param, type(region_param)
-        birds = Bird.query.order_by(Bird.taxon_id).filter(Bird.region==region_param).all()
-    else:
-        birds = Bird.query.order_by(Bird.taxon_id).all()
+        q = q.filter(Bird.region.like('%'+region_param+'%'))
 
-    return render_template("homepage.html", orders=orders, families = families, birds=birds)
+    # put the final query in order by taxon ID
+    q = q.order_by(Bird.taxon_id)
+
+    # get a list of bird objects
+    birds = q.all()
+
+    # get a list of order objects
+    orders_objects = q.group_by(Bird.order).all()
+
+    # generate a list of orders
+    orders_list = []
+    for order in orders_objects:
+        orders_list.append(order.order)
+
+    # get a list of family objects
+    families_objects = q.group_by(Bird.family).all()
+
+    # generate a list of (family, order) tuples
+    families = []
+    for family in families_objects:
+        families.append((family.family, family.order))
+
+    return render_template("homepage.html", orders=orders_list, families = families, birds=birds)
 
 
 # def searchfunct(list (maybe a dictionary?) of arguments):
@@ -164,7 +224,7 @@ def show_signup():
 @app.route('/signup', methods=["POST"])
 def process_signup():
 
-    username = request.form.get("username")
+    username = request.form.get("username").lower()
     password = request.form.get("password")
     email = request.form.get("email")
 
@@ -246,11 +306,11 @@ def add_obs():
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
     # that we invoke the DebugToolbarExtension
-    # app.debug = True
+    app.debug = True
 
     connect_to_db(app)
 
     # Use the DebugToolbar
-    # DebugToolbarExtension(app)
+    DebugToolbarExtension(app)
 
     app.run()

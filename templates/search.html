@@ -3,6 +3,15 @@
 {% block body %}
 <h2>Select Search Terms:</h2>
 <form action="/search" class="form-search" method="POST">
+  <label>Show which birds?
+    <br>
+    <input type="radio" name="which_birds" value="all_birds" checked>Show all birds.
+    <br>
+    <input type="radio" name="which_birds" value="my_birds">Only show birds I have seen.
+    <br>
+    <input type="radio" name="which_birds" value="not_my_birds">Only show I have not seen.
+  </label>
+  <p></p>
   <label>Select a kind of bird:
     <select name="select_spuh">
         <option value=""></option>
@@ -33,12 +42,16 @@
   	<label>Select a region:
   		<select name="select_region">
   			<option value=""></option>
-	  		{% for region in regions %}
-	  	  	<option value="{{region.region}}">{{region.region}}</option>
+        {% for key, value in regions.iteritems() %}
+	  	  	<option value="{{key}}">{{value}}</option>
 	  		{% endfor %}
   		</select>
   </label>
-
+  <p>or</p>
+  <label>Type in this box: 
+    <input type="text" name="fuzzy">
+  </label>
+  <br>
   <button class="btn btn-lg btn-primary btn-block" type="submit">Search
         </button>
  </form>
