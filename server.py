@@ -17,7 +17,7 @@ app.jinja_env.undefined = StrictUndefined
 # common names for bird orders
 SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
                     'Rheiformes' : "Rheas",
-                    'Casuariiformes' : "Cassowaries",
+                    'Casuariiformes' : "Cassowaries and emus",
                     'Apterygiformes' : "Kiwis",
                     'Tinamiformes' : "Tinamous",
                     'Anseriformes' : "Ducks, geese, and swans",
@@ -104,10 +104,9 @@ def index():
 def mark_birds():
     
     # This will return None if the user is not logged in
-    this_user = session.get('username')
+    this_user_id = session.get('user_id')
 
-    if this_user is not None:
-        this_user_id = User.query.filter(User.username == session['username']).one().user_id
+    if this_user_id is not None:
         print this_user_id
 
         obs_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
@@ -152,16 +151,29 @@ def search_results():
 
     q = Bird.query
 
+# Bird.query.filter(Bird.taxon_id.in_(list of bird ids))
+
     if bird_limit_param:
-        # if bird_limit_param == "all_birds":
-            # pass
-        # elif bird_limit_param == "my_birds":
+        this_user_id = session.get('user_id')
+        obs_query = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id)
+        obs_list = [obs[0] for obs in obs_query.all()]
+        print "user = ", this_user_id
+        print "query = ", obs_query
+        print "and all = ", obs_query.all()
+        print obs_list
+
+        if bird_limit_param == "all_birds":
+            pass
+
+        elif bird_limit_param == "my_birds":
+            pass
             # only show birds I have observed
-        # elif bird_limit_param == "not_my_birds":
+            q = q.filter(Bird.taxon_id.in_(obs_list))
+
+        elif bird_limit_param == "not_my_birds":
+            pass
             # only show birds I have not observed
-        pass
-    else:
-        pass
+            q = q.filter(~Bird.taxon_id.in_(obs_list))
 
         # right now, "spuh" is just another way of picking an order
     if spuh_param:
@@ -248,10 +260,12 @@ def process_login():
     username_input = request.form.get("username")
     password_input = request.form.get("password")
     user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
+    user_id_input = user_object.user_id
     bird_count_input = user_object.bird_count
 
     session['username'] = username_input
     session['password'] = password_input
+    session['user_id']  = user_id_input
 
     return redirect('/')
 
