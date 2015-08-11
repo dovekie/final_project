@@ -34,6 +34,8 @@ def load_birds():
 
 
     # match the faircloth data to the ebird data, and use both to create a new row in the birds table.
+    # might be a good idea to convert this to ascii (it's unicode right now)
+    # at the moment, ascii conversion is handled by server.py in /search GET route
     for bird in faircloth_birds:
         if bird["binomial"] in ebirds:
             binomial = bird["binomial"]

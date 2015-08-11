@@ -5,7 +5,7 @@
 <form action="/search" class="form-search" method="POST">
   <label>Show which birds?
     <br>
-    <input type="radio" name="which_birds" value="all_birds" checked>Show all birds.
+    <input type="radio" name="which_birds" value="all" checked>Show all birds.
     <br>
     <input type="radio" name="which_birds" value="my_birds">Only show birds I have seen.
     <br>
@@ -14,7 +14,7 @@
   <p></p>
   <label>Select a kind of bird:
     <select name="select_spuh">
-        <option value=""></option>
+        <option value="all" selected="selected"></option>
         {% for key, value in spuh.iteritems() %}
           <option value="{{key}}">{{ value }}</option>
         {% endfor %}
@@ -23,25 +23,25 @@
   <p>or</p>
 	<label>Select an order:
 		<select name="select_order">
-  		  <option value=""></option>
+  		  <option value="all" selected="selected"></option>
         {% for order in orders %}
-  		  	<option value="{{order.order}}">{{order.order}}</option>
+  		  	<option value="{{order}}">{{order}}</option>
   			{% endfor %}
   		</select>
   	</label>
   	<p>or</p>
   	<label>Select a family:
   		<select name="select_family">
-  			<option value=""></option>
+        <option value="all" selected="selected"></option>
 	  		{% for family in families %}
-	  	  	<option value="{{family.family}}">{{family.family}}</option>
+	  	  	<option value="{{family[0]}}">{{family[0]}}</option>
 	  		{% endfor %}
   		</select>
  	</label>
   	<p>or</p>
   	<label>Select a region:
   		<select name="select_region">
-  			<option value=""></option>
+        <option value="all" selected="selected"></option>
         {% for key, value in regions.iteritems() %}
 	  	  	<option value="{{key}}">{{value}}</option>
 	  		{% endfor %}
