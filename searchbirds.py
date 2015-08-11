@@ -5,8 +5,6 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 
 	q = Bird.query
 
-	print "REGION IS THIS: ", region
-
 	if bird_limit is not "all":
 		# print "bird limit var: ", bird_limit
 		obs_query = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id)
