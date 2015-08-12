@@ -6,7 +6,8 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 	q = Bird.query
 
 	if bird_limit is not "all":
-		# print "bird limit var: ", bird_limit
+		print "bird limit var: ", bird_limit
+		print "user id: ", this_user_id
 		obs_query = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id)
 		obs_list = [obs[0] for obs in obs_query.all()]
 

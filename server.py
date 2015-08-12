@@ -1,10 +1,11 @@
-"""BirdGrip Website"""
-"""("grip" is birder slang for bragging about one's sightings)"""
+"""Lek website"""
 
 from jinja2 import StrictUndefined
 
 from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
+
+from datetime import datetime
 
 from model import User, Bird, Observation, connect_to_db, db
 
@@ -59,23 +60,23 @@ SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
                     'Passeriformes' : "Songbirds"}
 
 # rationalizing location codes
-REGION_CODES = { "NA" : "North America",
-              "MA" : "Middle America",
-              "SA" : "South America",
-              "LA" : "Latin America",
-              "AF" : "Africa",
-              "EU" : "Eurasia",
-              "OR" : "South Asia",
-              "AU" : "Australasia",
-              "AO" : "Atlantic Ocean",
-              "PO" : "Pacific Ocean",
-              "IO" : "Indian Ocean",
-              "TrO": "Tropical Ocean",
-              "TO" : "Temperate Ocean",
-              "NO" : "Northern Ocean",
-              "SO" : "Southern Ocean",
-              "AN" : "Antarctica",
-              "So. Cone" : "Southern Cone"
+REGION_CODES = {  "NA" : "North America",
+                  "MA" : "Middle America",
+                  "SA" : "South America",
+                  "LA" : "Latin America",
+                  "AF" : "Africa",
+                  "EU" : "Eurasia",
+                  "OR" : "South Asia",
+                  "AU" : "Australasia",
+                  "AO" : "Atlantic Ocean",
+                  "PO" : "Pacific Ocean",
+                  "IO" : "Indian Ocean",
+                  "TrO": "Tropical Ocean",
+                  "TO" : "Temperate Ocean",
+                  "NO" : "Northern Ocean",
+                  "SO" : "Southern Ocean",
+                  "AN" : "Antarctica",
+                  "So. Cone" : "Southern Cone"
 }
 
 # Housekeeping over. Now for routes.
@@ -87,60 +88,72 @@ def index():
 
     Displays a dynamic list of bird species organized by order and family
     """
-    this_user_id = session.get('user_id')
-    if this_user_id:
-        #use the user's presets for birdsearch
+
+    this_user_id = session.get('user_id')                               # if the user is logged in, this will return their ID
+
+    if this_user_id:                                                    # use the user's presets for birdsearch
         bird_dict = birdsearch()
-    else:
+    else:                                                               # otherwise, show the generic page
         bird_dict = birdsearch()
 
     return render_template("homepage.html", orders=bird_dict["orders"], families = bird_dict["families"], birds=bird_dict["birds"])
 
 @app.route('/mark_user_birds', methods=["GET"])
 def mark_birds():
-    
-    # This will return None if the user is not logged in
-    this_user_id = session.get('user_id')
+    """
+    I talk to AJAX. I return a jsonified list of the birds that the user has seen. I do not have a view.
+    """
+
+    this_user_id = session.get('user_id')                               # This will return None if the user is not logged in
 
     if this_user_id is not None:
-        print this_user_id
-
+                                                                        # get a list of the user's observations from the DB
         obs_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
 
-        print len(obs_list)
-
-        #clean up one-item tuples
+                                                                        # clean up one-item tuples
         obs_dict = {obs[0]: '' for obs in obs_list}
 
-        obs_json = jsonify(obs_dict)
-        print obs_json
+        obs_json = jsonify(obs_dict)                                    # make a json string for the AJAX call
 
         return obs_json
-    else:
-        return jsonify({})  # FIXME
+
+@app.route('/birdcount', methods=["GET"])
+def birdcount():
+    """ I talk to AJAX. I return a string of the number of birds seen by the user. """
+
+    this_user_id = session.get('user_id')                               
+
+    if this_user_id:
+        birds_dict = birdsearch(this_user_id = this_user_id, bird_limit = "my_birds")       # ask birdsearch for all the birds seen by a user
+        count = len(birds_dict["birds"])                                                    # get the length of the list of bird objects
+
+    return str(count)                                                                       # return a string for the AJAX call
+
 
 @app.route('/search', methods=["GET"])
 def search():
     """
-    Search form
-
-    Get search parameter from the user
+    Search form. I pass the SPUH dictionary, a list of orders, 
+    a list of (family, order) tuples, a list of bird objects,
+    and the REGIONS dictionary to the search template.
     """
-    spuh = SPUH_EQUIVALENTS
+    spuh = SPUH_EQUIVALENTS                                                 # get the SPUH dictionary
 
-    bird_dict = birdsearch()
+    bird_dict = birdsearch()                                                # ask birdsearch for a list of all birds
 
-    regions = REGION_CODES
+    regions = REGION_CODES                                                  # get the REGION dictionary
 
     return render_template("search.html", orders=bird_dict["orders"], families = bird_dict["families"], regions=regions, spuh=spuh)
 
 @app.route('/search', methods=["POST"])
 def search_results():
     """
-    Search functions
+    Search form input.
 
-    Take search parameters from the user and queries the database
+    Pass user input strings to birdsearch. Also pass the user's ID if the user is logged in.
+    Use the results from birdsearch to rerender the homepage.
     """
+
 
     bird_limit_param = request.form.get("which_birds")
     spuh_param = request.form.get("select_spuh")
@@ -150,8 +163,6 @@ def search_results():
     other_param = request.form.get("fuzzy")
 
     this_user_id = session.get('user_id')
-
-    print "all params wtf: ", bird_limit_param, spuh_param, order_param, family_param, region_param, other_param
 
     bird_dict = birdsearch(this_user_id = this_user_id,
                            bird_limit = bird_limit_param,
@@ -164,20 +175,29 @@ def search_results():
 
 @app.route('/signup', methods=["GET"])
 def show_signup():
+    """
+    Render the signup page
+    """
+
     return render_template("signup.html")
 
 @app.route('/signup', methods=["POST"])
 def process_signup():
+    """
+    Get the user's name, password, and email.
+    Add them to the database
+    Then send them to the homepage and make them log in.
+    """
 
-    username = request.form.get("username").lower()
+    username = request.form.get("username")
     password = request.form.get("password")
     email = request.form.get("email")
-
-    new_user = User(username=username,
+                                            # FIXME to check for preexisting usernames
+    new_user = User(username=username,      # create a User object
                     password=password,
                     email=email,
                     bird_count=0)
-    db.session.add(new_user)
+    db.session.add(new_user)                # add the new user to the database
     db.session.commit()
     flash('New account created! Please log in.')
 
@@ -185,56 +205,68 @@ def process_signup():
 
 @app.route('/login', methods=["GET"])
 def show_login():
+    """
+    Render the login page
+    """
+
     return render_template("login.html") # but I want to put this in a modal window!
 
 @app.route('/login', methods=["POST"])
 def process_login():
+    """
+    Login form input. Checks the username and password against the database
+    Then either sets the session variables or tells the user to try again
+    """
 
     username_input = request.form.get("username")
     password_input = request.form.get("password")
-    # try: 
-    user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
-    # except: 
 
-    user_id_input = user_object.user_id
-    bird_count_input = user_object.bird_count
+    try: 
+        user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
+        user_id_input = user_object.user_id
+    except AttributeError:
+        user_id_input = "guest"
 
-    session['username'] = username_input
-    session['password'] = password_input
-    session['user_id']  = user_id_input
+    if user_id_input is "guest":
+        flash('No such user found. Create a new account or log in.')
+        return redirect('/login')
 
-    return redirect('/')
+    else:
+        session['username'] = username_input
+        session['password'] = password_input
+        session['user_id']  = user_id_input
+
+        return redirect('/')
 
 @app.route('/logout')
 def logout():
     """
     Clear the user's session variable
+    Render the homepage.
     """
 
     session.clear()
-
+    flash('You have logged out.')
     return redirect('/')
 
 
 @app.route('/add_obs', methods=["POST"])
 def add_obs():
+    """
+    I talk to AJAX. I update the Observation table when users click on species names.
+
+    I get the bird ID from AJAX and the user ID from session.
+
+    I do not return a view. I return victory.
+    """
     
-    try:
-        this_user = session['username']
-    except KeyError:
-        this_user = "guest"
+    this_user_id = session.get('user_id')
 
-    print "this username:", this_user
-
-    if this_user is not "guest":
-        user_id = User.query.filter(User.username == session['username']).one().user_id
-
-        print "this user_id", user_id
-        
-        count = request.form.get('count')
+    if this_user_id:
         bird_id = request.form.get('bird')
 
-        obs = Observation.query.filter(Observation.bird_id == bird_id, Observation.user_id == user_id).first()
+        obs = Observation.query.filter(Observation.bird_id == bird_id, 
+                                       Observation.user_id == this_user_id).first()
 
         if obs:
             print "deleting", obs
@@ -242,10 +274,10 @@ def add_obs():
             db.session.commit()
         else:
             print "wow new obs"
-            print "user id and bird id", user_id, bird_id
-            new_obs = Observation(  user_id = user_id,
+            print "user id and bird id", this_user_id, bird_id
+            new_obs = Observation(  user_id = this_user_id,
                                     bird_id = bird_id,
-                                    timestamp = "0")
+                                    timestamp = datetime.utcnow() )
             db.session.add(new_obs)
             db.session.commit()
 

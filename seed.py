@@ -6,7 +6,8 @@ from server import app
 import requests
 
 def load_birds():
-    """Load bird species data from eBird into database.
+    """
+    Load bird species data from eBird and Faircloth APIs into database.
 
     """
     # These two lines get the full ebird json. commented out for testing purposes.

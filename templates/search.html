@@ -5,11 +5,11 @@
 <form action="/search" class="form-search" method="POST">
   <label>Show which birds?
     <br>
-    <input type="radio" name="which_birds" value="all" checked>Show all birds.
+    <input type="radio" name="which_birds" value="all" checked> Show all birds.
     <br>
-    <input type="radio" name="which_birds" value="my_birds">Only show birds I have seen.
+    <input type="radio" name="which_birds" value="my_birds"> Only show birds I have seen.
     <br>
-    <input type="radio" name="which_birds" value="not_my_birds">Only show I have not seen.
+    <input type="radio" name="which_birds" value="not_my_birds"> Only show I have not seen.
   </label>
   <p></p>
   <label>Select a kind of bird:
@@ -50,6 +50,10 @@
   <p>or</p>
   <label>Type in this box: 
     <input type="text" name="fuzzy">
+  </label>
+  <br>
+  <label>Save this search?
+      <input type="checkbox" name="save_this" value="true"></input>
   </label>
   <br>
   <button class="btn btn-lg btn-primary btn-block" type="submit">Search
