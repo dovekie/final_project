@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	{% for this_search in search_list %}
+	
+		{% for key, value in this_search.iteritems() %}
+				<form action="/search" method="POST">
+					<input hidden name="{{key}}", value="{{value[0]}}">
+				{% if value[0] != "all" and key != "save_this" and key != "fuzzy" %}
+					{% if key == "select_spuh" %}
+						<br>
+						<label for="{{key}}">Kind of bird: {{SPUH_EQUIVALENTS[value[0]]}}</label>
+					{% elif key == "select_order" %}
+						<br>
+						<label for="{{key}}">Order: {{value[0]}}</label>
+					{% elif key == "select_family" %}
+						<br>
+						<label for="{{key}}">Family: {{value[0]}}</label>
+					{% elif key == "select_region" %}
+						<br>
+						<label for="{{key}}">In: {{REGION_CODES[value[0]]}}</label>
+					{% elif key == "which_birds" and value[0] == "my_birds" %}
+						<br>
+						<label for="{{key}}">Seen</label>
+					{% elif key == "which_birds" and value[0] == "not_my_birds" %}
+						<br>
+						<label for="{{key}}">Not seen</label>
+					{% else %}
+						<br>
+						<label for="{{key}}">{{value[0]}}</label>
+					{% endif %}
+				{% endif %}
+		{% endfor %}
+			<br>
+				<input type="submit" value="Run this search">
+			</form>
+			<br>
+	{% endfor %}
+	<a href="/search">New Search</a>
+{% endblock %}

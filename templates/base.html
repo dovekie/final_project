@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="static/style.css"/>
     <title>Lek</title>
     <script src="static/jquery.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
 </head>
 
 <body>
@@ -26,11 +27,17 @@
                       {% else %}0
                       {% endif %}</span></a>
                 </li>
+                <li>
+                  <a href="/map">Map</a>
+                </li>
                 {% if 'username' in session.keys() %}
                 <li>
                   <a href="#">Welcome, {{session["username"]}}</a>
                 <li>
                     <a href="/search">Search</a>
+                </li>
+                <li>
+                  <a href="/saved_searches">My Saved Searches</a>
                 </li>
                 <li>
                     <a href="/logout">Logout</a>

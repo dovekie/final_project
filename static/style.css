@@ -28,3 +28,7 @@
 .sci_name_span {
 	font-style: italic;
 }
+
+#map-canvas { 
+	height: 100%;
+}

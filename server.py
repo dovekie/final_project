@@ -4,10 +4,11 @@ from jinja2 import StrictUndefined
 
 from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
+import json
 
 from datetime import datetime
 
-from model import User, Bird, Observation, connect_to_db, db
+from model import User, Bird, Observation, UserSearch, connect_to_db, db
 
 from searchbirds import birdsearch
 
@@ -16,6 +17,8 @@ app = Flask(__name__)
 app.secret_key = "TINAMOU"
 
 app.jinja_env.undefined = StrictUndefined
+
+# should probably move these variables to their own file.
 
 # common names for bird orders
 SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
@@ -80,6 +83,8 @@ REGION_CODES = {  "NA" : "North America",
 }
 
 # Housekeeping over. Now for routes.
+##############################################################################
+# HOMEPAGE ROUTES
 
 @app.route('/')
 def index():
@@ -91,7 +96,10 @@ def index():
 
     this_user_id = session.get('user_id')                               # if the user is logged in, this will return their ID
 
-    if this_user_id:                                                    # use the user's presets for birdsearch
+    if this_user_id: # use the user's presets for birdsearch if they have any
+        check_for_default = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
+                                                   UserSearch.user_default == True).first() 
+        print "default?", check_for_default
         bird_dict = birdsearch()
     else:                                                               # otherwise, show the generic page
         bird_dict = birdsearch()
@@ -119,7 +127,9 @@ def mark_birds():
 
 @app.route('/birdcount', methods=["GET"])
 def birdcount():
-    """ I talk to AJAX. I return a string of the number of birds seen by the user. """
+    """
+    If a logged-in user loads the home page, call birdsearch with the user's ID and "my_birds"
+    """
 
     this_user_id = session.get('user_id')                               
 
@@ -129,6 +139,8 @@ def birdcount():
 
     return str(count)                                                                       # return a string for the AJAX call
 
+##############################################################################
+# SEARCH ROUTES
 
 @app.route('/search', methods=["GET"])
 def search():
@@ -153,8 +165,38 @@ def search_results():
     Pass user input strings to birdsearch. Also pass the user's ID if the user is logged in.
     Use the results from birdsearch to rerender the homepage.
     """
+    # get the user's id
+    this_user_id = session.get('user_id')
+
+    # get the user's search request as a json string
+    search_response = dict(request.form)  # get the entire request object and turn it into a dictionary
+    search_storage_string = json.dumps(search_response) # turn the dict into a json string
+
+    print "Search string: ", search_storage_string, type(search_storage_string) # leaving this for diagnostics
+
+    # if the user wants to save their search
+    search_param = request.form.get("save_this")
+    default_param = request.form.get("set_default")
+
+    if search_param == "true":
+
+        # check if the search already exists
+        check_for_search = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
+                                                   UserSearch.search_string == search_storage_string).first()
+
+        if default_param:
+            set_default = 1
+        else:
+            set_default = 0
+        # if the search string does not exist, add it to the database
+        if not check_for_search:
+            print "Saving new search: ", search_storage_string
+            new_search = UserSearch(user_id = this_user_id, search_string = search_storage_string, user_default=set_default)
+            db.session.add(new_search)
+            db.session.commit()
 
 
+    # get the user's search variables
     bird_limit_param = request.form.get("which_birds")
     spuh_param = request.form.get("select_spuh")
     order_param = request.form.get("select_order")
@@ -162,8 +204,7 @@ def search_results():
     region_param = request.form.get("select_region")
     other_param = request.form.get("fuzzy")
 
-    this_user_id = session.get('user_id')
-
+    # pass everything to birdsearch, which returns a dictionary
     bird_dict = birdsearch(this_user_id = this_user_id,
                            bird_limit = bird_limit_param,
                            spuh = spuh_param, 
@@ -171,7 +212,32 @@ def search_results():
                            family = family_param,
                            region = region_param)
 
+
+    # use the birdsearch dictionary to render the home page
     return render_template("homepage.html", orders=bird_dict["orders"], families = bird_dict["families"], birds=bird_dict["birds"])
+
+@app.route('/saved_searches', methods=["GET"])
+def show_saved_searches():
+    """
+    I get the user's searches from the UserSearch database table and display them.
+    """
+    this_user_id = session.get('user_id')                               # This will return None if the user is not logged in
+
+    if this_user_id is not None:
+                                                                        # get a list of the user's searches from the DB
+
+        search_list = db.session.query(UserSearch.search_string).filter(UserSearch.user_id == this_user_id).all()
+
+        search_list = [json.loads(this_search[0]) for this_search in search_list]
+
+        return render_template("saved_searches.html", search_list=search_list, SPUH_EQUIVALENTS=SPUH_EQUIVALENTS, REGION_CODES=REGION_CODES)
+    else:
+        flash('Please log in to access saved searches')
+        return redirect('/')
+        
+
+##############################################################################
+# SIGNUP/LOGIN ROUTES
 
 @app.route('/signup', methods=["GET"])
 def show_signup():
@@ -249,7 +315,8 @@ def logout():
     flash('You have logged out.')
     return redirect('/')
 
-
+##############################################################################
+# OBSERVATION ROUTES
 @app.route('/add_obs', methods=["POST"])
 def add_obs():
     """
@@ -282,8 +349,15 @@ def add_obs():
             db.session.commit()
 
 
-    return "Victory"
+    return "Victory!"
 
+##############################################################################
+# MAP ROUTES
+@app.route('/map')
+def map():
+    return render_template("maptemp.html")
+
+##############################################################################
 # Stuff I didn't write that makes the app go.
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point

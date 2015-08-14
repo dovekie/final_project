@@ -79,6 +79,24 @@ class Observation(db.Model):
 
         return "<Observation user_id = %s taxon_id = %s>" %(self.user_id, self.bird_id)
 
+class UserSearch(db.Model):
+    """Saved user searches"""
+
+    __tablename__ = "usersearches"
+
+    search_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    search_string = db.Column(db.LargeBinary, nullable=False)
+    user_default = db.Column(db.Boolean, nullable=False, default=False)
+
+    # Define relationship with users
+    user = db.relationship("User", backref=db.backref("usersearches", order_by=User.user_id))
+
+    def __repr__(self):
+        """Provide helpful information when printed!"""
+
+        return "<Search user_id = %s search_string = %s>" %(self.user_id, self.search_string)
+
 ##############################################################################
 # Helper functions
 

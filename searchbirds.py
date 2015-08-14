@@ -5,15 +5,15 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 
 	q = Bird.query
 
-	if bird_limit is not "all":
-		print "bird limit var: ", bird_limit
-		print "user id: ", this_user_id
+	if bird_limit != "all":
+		print "bird limit var: ", bird_limit  
+		print "user id: ", this_user_id 
 		obs_query = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id)
 		obs_list = [obs[0] for obs in obs_query.all()]
 
 		# print "obslist", obs_list
 
-		if bird_limit == "my_birds":
+		if bird_limit == "my_birds": # this will be called with "my_birds" whenever a logged in user loads the homepage. Chill.
 		# only show birds I have observed
 			q = q.filter(Bird.taxon_id.in_(obs_list))
 
@@ -24,12 +24,12 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 
 	# right now, "spuh" is just another way of picking an order
 	if spuh != "all":
-		# print "spuh: ", spuh, type(spuh)
+		print "spuh: ", spuh, type(spuh)
 		order = spuh
 		# print "first spuh: ", q.first()
 
 	if order !="all": 
-		# print "order ", order, type(order)
+		print "order ", order, type(order)
 		q = q.filter_by(order = order)
 		# print "first order ", q.first()
 
@@ -40,6 +40,7 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 
         # search inside the region field
 	if region != "all":
+		print "region ", region
 		q = q.filter(Bird.region.like('%'+region+'%'))
 		print "ALL THE REGIONS ", q.all()
 
@@ -74,7 +75,7 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 		unicode_family = family.family
 		ascii_order = unicode_order.encode('ascii', 'ignore')
 		ascii_family = unicode_family.encode('ascii', 'ignore')
-		families.append((family.family, ascii_order))
+		families.append((ascii_family, ascii_order))
 
 	return {"orders" : orders_list,
 			"families": families,
