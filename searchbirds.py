@@ -42,7 +42,6 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 	if region != "all":
 		print "region ", region
 		q = q.filter(Bird.region.like('%'+region+'%'))
-		print "ALL THE REGIONS ", q.all()
 
     # put the final query in order by taxon ID
 	q = q.order_by(Bird.taxon_id)

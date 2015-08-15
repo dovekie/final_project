@@ -88,6 +88,7 @@ class UserSearch(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     search_string = db.Column(db.LargeBinary, nullable=False)
     user_default = db.Column(db.Boolean, nullable=False, default=False)
+    timestamp = db.Column(db.Integer, nullable=False)
 
     # Define relationship with users
     user = db.relationship("User", backref=db.backref("usersearches", order_by=User.user_id))

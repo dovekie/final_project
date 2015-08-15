@@ -26,12 +26,17 @@
 						<br>
 						<label for="{{key}}">Not seen</label>
 					{% else %}
-						<br>
-						<label for="{{key}}">{{value[0]}}</label>
+						<span></span>
 					{% endif %}
 				{% endif %}
 		{% endfor %}
-			<br>
+		<br>
+		{% if this_search.get("set_default") == None %}
+			<label>Set default: 
+				<input type="checkbox" name="set_default" value="true"></input>
+			</label>
+		<br>
+		{% endif %}
 				<input type="submit" value="Run this search">
 			</form>
 			<br>

@@ -4,7 +4,7 @@ from jinja2 import StrictUndefined
 
 from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-import json
+import json                                         # FIXME
 
 from datetime import datetime
 
@@ -96,11 +96,31 @@ def index():
 
     this_user_id = session.get('user_id')                               # if the user is logged in, this will return their ID
 
+    user_default = None
+
     if this_user_id: # use the user's presets for birdsearch if they have any
-        check_for_default = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
-                                                   UserSearch.user_default == True).first() 
-        print "default?", check_for_default
-        bird_dict = birdsearch()
+        user_default = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
+                                                   UserSearch.user_default == True).first()
+    if this_user_id and user_default:
+        print "default?", user_default.search_string
+
+        default_string = user_default.search_string
+
+        default_dict = json.loads(default_string)
+
+        for key, value in default_dict.iteritems():
+            print key, value[0]
+
+        spuh = default_dict['select_spuh'][0]
+        order = default_dict['select_order'][0]
+        family = default_dict['select_family'][0]
+        region = default_dict['select_region'][0]
+        bird_limit = default_dict['which_birds'][0]
+
+        session["default_view"] = default_string
+
+
+        bird_dict = birdsearch(this_user_id, bird_limit, spuh, order, family, region)
     else:                                                               # otherwise, show the generic page
         bird_dict = birdsearch()
 
@@ -137,7 +157,9 @@ def birdcount():
         birds_dict = birdsearch(this_user_id = this_user_id, bird_limit = "my_birds")       # ask birdsearch for all the birds seen by a user
         count = len(birds_dict["birds"])                                                    # get the length of the list of bird objects
 
-    return str(count)                                                                       # return a string for the AJAX call
+        return str(count)
+    else:
+        return str(0)                                                                      # return a string for the AJAX call
 
 ##############################################################################
 # SEARCH ROUTES
@@ -175,26 +197,23 @@ def search_results():
     print "Search string: ", search_storage_string, type(search_storage_string) # leaving this for diagnostics
 
     # if the user wants to save their search
-    search_param = request.form.get("save_this")
-    default_param = request.form.get("set_default")
+    search_param = request.form.get("save_this", None)
+    default_param = request.form.get("set_default", None)
 
-    if search_param == "true":
+    if default_param:
+        set_default = 1
+    else:
+        set_default = 0
 
-        # check if the search already exists
-        check_for_search = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
-                                                   UserSearch.search_string == search_storage_string).first()
-
-        if default_param:
-            set_default = 1
-        else:
-            set_default = 0
-        # if the search string does not exist, add it to the database
-        if not check_for_search:
-            print "Saving new search: ", search_storage_string
-            new_search = UserSearch(user_id = this_user_id, search_string = search_storage_string, user_default=set_default)
-            db.session.add(new_search)
-            db.session.commit()
-
+    if search_param == "true":  # if the user wants to save a search
+        print "So you want to save a search?", search_param
+        print "Saving new search: ", search_storage_string
+        new_search = UserSearch(user_id = this_user_id, 
+                                search_string = search_storage_string, 
+                                user_default=set_default, 
+                                timestamp = datetime.utcnow())
+        db.session.add(new_search)
+        db.session.commit()
 
     # get the user's search variables
     bird_limit_param = request.form.get("which_birds")
@@ -226,9 +245,10 @@ def show_saved_searches():
     if this_user_id is not None:
                                                                         # get a list of the user's searches from the DB
 
-        search_list = db.session.query(UserSearch.search_string).filter(UserSearch.user_id == this_user_id).all()
+        search_list = db.session.query(UserSearch.search_string, UserSearch.timestamp).filter(UserSearch.user_id == this_user_id).all()
 
         search_list = [json.loads(this_search[0]) for this_search in search_list]
+        print search_list
 
         return render_template("saved_searches.html", search_list=search_list, SPUH_EQUIVALENTS=SPUH_EQUIVALENTS, REGION_CODES=REGION_CODES)
     else:
