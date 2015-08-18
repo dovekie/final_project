@@ -33,8 +33,10 @@
   	<label>Select a family:
   		<select name="select_family">
         <option value="all" selected="selected"></option>
-	  		{% for family in families %}
-	  	  	<option value="{{family[0]}}">{{family[0]}}</option>
+	  		{% for order in birds_nest.keys() %}
+          {% for family in birds_nest[order].keys() %}
+	  	  	<option value="{{family}}">{{family}}</option>
+          {% endfor %}
 	  		{% endfor %}
   		</select>
  	</label>

@@ -2,7 +2,7 @@
 
 {% block body %}
 	{% for this_search in search_list %}
-		<div id="{{this_search}}">
+		<div class="saved_search">
 		{% for key, value in this_search.iteritems() %}
 				<form action="/search" class="form_saved" method="POST">
 					<input hidden name="{{key}}", value="{{value}}">
@@ -34,9 +34,9 @@
 				<input type="submit" value="Run this search">
 			</form>
 			<br>
-			<label>
 				<input type="submit" class="default_set_button" value="Make this your default">
-			</label>
+			<br>
+				<input type="submit" class="delete_save_search" value="Delete this search">
 			<br>
 		</div>
 	{% endfor %}

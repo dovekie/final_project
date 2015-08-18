@@ -1,14 +1,11 @@
 from model import User, Bird, Observation, connect_to_db, db
+import pprint
 
 def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all", family = "all", region = "all", other=None):
 	""" 
-	I take parameters from the server and return lists, lists of tuples, and lists of objects
-
-	I should be changed so I return a complex dictionary, like this:
-	order { familya{bird1, bird2}, familyb{bird4, bird5}}
+	I take parameters from the server and return a list of orders and a dictionary like so:
+	dict = {order: {family_1: {birdA: {bird: data}, birdB: {bird: data}}}}
 	"""
-
-
 
 	q = Bird.query
 
@@ -55,34 +52,37 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 
 	# get a list of bird objects
 	birds = q.all()
-	# print "birds? ", type(birds), 
-	# try:
-	# 	print birds[0]
-	# except IndexError:
-	# 	print "no birds."
+
+	# get a list of family objects
+	families_objects = q.group_by(Bird.family).all()
 
 	# get a list of order objects
 	orders_objects = q.group_by(Bird.order).all()
 
 	# generate a list of orders
-	orders_list = []
-	for order in orders_objects:
-		unicode_order = order.order
-		ascii_order = unicode_order.encode('ascii', 'ignore')
-		orders_list.append(order.order)
+	orders_list = [order.order.encode('ascii', 'ignore') for order in orders_objects]
 
-	# get a list of family objects
-	families_objects = q.group_by(Bird.family).all()
+	# begin the big dictionary of birds
+	birds_dict = {order: {} for order in orders_list}
 
-	# generate a list of (family, order) tuples
-	families = []
+	# add families to the big dictionary of birds
 	for family in families_objects:
-		unicode_order = family.order
-		unicode_family = family.family
-		ascii_order = unicode_order.encode('ascii', 'ignore')
-		ascii_family = unicode_family.encode('ascii', 'ignore')
-		families.append((ascii_family, ascii_order))
+		birds_dict[family.order.encode('ascii', 'ignore')][family.family.encode('ascii', 'ignore')] = {}
 
-	return {"orders" : orders_list,
-			"families": families,
-			"birds" : birds}
+	#add birds to the big dictionary of birds
+	for bird in birds:
+		birds_dict[bird.order.encode('ascii', 'ignore')][bird.family.encode('ascii', 'ignore')][bird.taxon_id.encode('ascii', 'ignore')] = {'order': bird.order.encode('ascii', 'ignore'), 
+																												  'family': bird.family.encode('ascii', 'ignore'), 
+																												  'sci_name': bird.sci_name, 
+																												  'common_name': bird.common_name,
+																												  'region': bird.region}
+
+	# FOR FUTURE REFERENCE:
+	# for order in orders_list:
+	# 	for family in birds_dict[order].keys():
+	# 		print ">>>", family
+	# 		for bird in birds_dict[order][family].keys():
+	# 			print ">>> >>>", bird
+
+	return {"birds_dict": birds_dict,
+			"orders" : orders_list}

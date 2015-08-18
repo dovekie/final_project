@@ -107,7 +107,12 @@ $( document ).ready( function() {
 	});
 });
 
+$( document ).ready( function() {
+	$(".delete_save_search").click( function() {
+		console.log("deleting! jk not really");
+	});
 
+});
 // omg map
 
 // var map;

@@ -128,7 +128,7 @@ def index():
     else:                                                               # otherwise, show the generic page
         bird_dict = birdsearch()
 
-    return render_template("homepage.html", orders=bird_dict["orders"], families = bird_dict["families"], birds=bird_dict["birds"])
+    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
 
 @app.route('/mark_user_birds', methods=["GET"])
 def mark_birds():
@@ -152,16 +152,16 @@ def mark_birds():
 @app.route('/birdcount', methods=["GET"])
 def birdcount():
     """
-    If a logged-in user loads the home page, call birdsearch with the user's ID and "my_birds"
+    If a logged-in user loads the home page, query the database for the total number of rows
+    in the observation table with that user's ID on them.
 
-    Then count the number of items in the dictionary returned.
+    Return the number of rows as a string for AJAX
     """
 
     this_user_id = session.get('user_id')                               
 
     if this_user_id:
-        birds_dict = birdsearch(this_user_id = this_user_id, bird_limit = "my_birds")       # ask birdsearch for all the birds seen by a user
-        count = len(birds_dict["birds"])                                                    # get the length of the list of bird objects
+        count = Observation.query.filter_by(user_id = this_user_id).count()
 
         return str(count)
     else:
@@ -183,7 +183,7 @@ def search():
 
     regions = REGION_CODES                                                  # get the REGION dictionary
 
-    return render_template("search.html", orders=bird_dict["orders"], families = bird_dict["families"], regions=regions, spuh=spuh)
+    return render_template("search.html", orders=bird_dict["orders"], birds_nest = bird_dict["birds_dict"], regions=regions, spuh=spuh)
 
 @app.route('/search', methods=["POST"])
 def search_results():
@@ -214,7 +214,7 @@ def search_results():
 
 
     # use the birdsearch dictionary to render the home page
-    return render_template("homepage.html", orders=bird_dict["orders"], families = bird_dict["families"], birds=bird_dict["birds"])
+    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
 
 @app.route('/add_search', methods=["POST"])
 def add_search():
