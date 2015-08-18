@@ -49,15 +49,23 @@
   </label>
   <p>or</p>
   <label>Type in this box: 
-    <input type="text" name="fuzzy">
+    <input type="text" name="fuzzy" value="None">
   </label>
-  <br>
-  <label>Save this search?
-      <input type="checkbox" name="save_this" value="true"></input>
-  </label>
-  <br>
   <button class="btn btn-lg btn-primary btn-block" type="submit">Search
         </button>
  </form>
+
+
+
+ 
+  <br>
+  <label>Save this search?
+      <input type="checkbox" id="isSaveChecked" name="save_this" value="true"></input>
+  </label>
+  <br>
+  <label>Make this search your new default?
+      <input type="checkbox" id="isDefaultChecked" name="new_default" value="true"></input>
+  </label>
+  <br>
 
 {% endblock %}

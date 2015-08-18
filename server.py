@@ -104,23 +104,27 @@ def index():
     if this_user_id and user_default:
         print "default?", user_default.search_string
 
-        default_string = user_default.search_string
+        if user_default:
+            print "found search list.", user_default
 
-        default_dict = json.loads(default_string)
+        param_list = user_default.search_string.split("&")
 
-        for key, value in default_dict.iteritems():
-            print key, value[0]
+        print "PARAM LIST:", param_list
 
-        spuh = default_dict['select_spuh'][0]
-        order = default_dict['select_order'][0]
-        family = default_dict['select_family'][0]
-        region = default_dict['select_region'][0]
-        bird_limit = default_dict['which_birds'][0]
+        search_dict = {}
 
-        session["default_view"] = default_string
+        for item in param_list:
+            this = item.split("=")
+            search_dict[this[0]] = this[1]
+        
+        print search_dict
 
-
-        bird_dict = birdsearch(this_user_id, bird_limit, spuh, order, family, region)
+        bird_dict = birdsearch(this_user_id, 
+                              search_dict["which_birds"], 
+                              search_dict["select_spuh"], 
+                              search_dict["select_order"], 
+                              search_dict["select_family"], 
+                              search_dict["select_region"])
     else:                                                               # otherwise, show the generic page
         bird_dict = birdsearch()
 
@@ -149,6 +153,8 @@ def mark_birds():
 def birdcount():
     """
     If a logged-in user loads the home page, call birdsearch with the user's ID and "my_birds"
+
+    Then count the number of items in the dictionary returned.
     """
 
     this_user_id = session.get('user_id')                               
@@ -190,31 +196,6 @@ def search_results():
     # get the user's id
     this_user_id = session.get('user_id')
 
-    # get the user's search request as a json string
-    search_response = dict(request.form)  # get the entire request object and turn it into a dictionary
-    search_storage_string = json.dumps(search_response) # turn the dict into a json string
-
-    print "Search string: ", search_storage_string, type(search_storage_string) # leaving this for diagnostics
-
-    # if the user wants to save their search
-    search_param = request.form.get("save_this", None)
-    default_param = request.form.get("set_default", None)
-
-    if default_param:
-        set_default = 1
-    else:
-        set_default = 0
-
-    if search_param == "true":  # if the user wants to save a search
-        print "So you want to save a search?", search_param
-        print "Saving new search: ", search_storage_string
-        new_search = UserSearch(user_id = this_user_id, 
-                                search_string = search_storage_string, 
-                                user_default=set_default, 
-                                timestamp = datetime.utcnow())
-        db.session.add(new_search)
-        db.session.commit()
-
     # get the user's search variables
     bird_limit_param = request.form.get("which_birds")
     spuh_param = request.form.get("select_spuh")
@@ -235,25 +216,134 @@ def search_results():
     # use the birdsearch dictionary to render the home page
     return render_template("homepage.html", orders=bird_dict["orders"], families = bird_dict["families"], birds=bird_dict["birds"])
 
+@app.route('/add_search', methods=["POST"])
+def add_search():
+    """
+    This function should add new searches to the database.
+
+    It should be called with an ajax request from the client.
+    It doesn't have to return anything (but it could return a confirmation...?)
+    """
+
+    print "Add search is running!"
+
+    search_string = request.form.get('search_string')
+
+    print search_string, type(search_string)
+    this_user_id = session.get('user_id', None)       # get the user's ID from session, or get None
+
+    print "THIS USER ID:", this_user_id
+
+    if this_user_id is not None:
+        is_default = 0  # might be able to take this out?
+
+        search_string = request.form.get('search_string').encode('ascii', 'ignore')     # get the stringified form from the ajax request
+
+        new_search = UserSearch(user_id = this_user_id, 
+                                search_string = search_string, 
+                                user_default=is_default, 
+                                timestamp = datetime.utcnow())
+        db.session.add(new_search)
+        db.session.commit()
+
+    return jsonify({})
+
 @app.route('/saved_searches', methods=["GET"])
 def show_saved_searches():
     """
     I get the user's searches from the UserSearch database table and display them.
     """
-    this_user_id = session.get('user_id')                               # This will return None if the user is not logged in
+    this_user_id = session.get('user_id', None)                               # This will return None if the user is not logged in
 
-    if this_user_id is not None:
-                                                                        # get a list of the user's searches from the DB
+    if this_user_id is not None:                                        # get a list of the user's searches from the DB
 
-        search_list = db.session.query(UserSearch.search_string, UserSearch.timestamp).filter(UserSearch.user_id == this_user_id).all()
+        search_list = db.session.query(UserSearch.search_string).filter(UserSearch.user_id == this_user_id).all()
 
-        search_list = [json.loads(this_search[0]) for this_search in search_list]
-        print search_list
+        if search_list:
+            print "found search list.", search_list
 
-        return render_template("saved_searches.html", search_list=search_list, SPUH_EQUIVALENTS=SPUH_EQUIVALENTS, REGION_CODES=REGION_CODES)
+        param_list = [this_list.search_string.split("&") for this_list in search_list]
+
+        print "PARAM LIST:", param_list
+        
+        final_list =[]
+
+        if param_list is not []:
+            for converted_list in param_list:
+                this_dict = {}
+                for item in converted_list:
+                    this = item.split("=")
+                    this_dict[this[0]] = this[1]
+                final_list.append(this_dict)
+        else:
+            print "wtf"
+
+        return render_template("saved_searches.html", search_list=final_list, SPUH_EQUIVALENTS=SPUH_EQUIVALENTS, REGION_CODES=REGION_CODES)
     else:
         flash('Please log in to access saved searches')
         return redirect('/')
+
+@app.route('/change_default', methods=["POST"])
+def change_default():
+    """
+    I am called when the user checks the "make this my new default" tick box
+    I change the value of the user_default field in the database to "true"
+    """
+
+    # if an old default exists, make it no longer a default
+    # if the search string already exists, make it default
+    # otherwise... what? create it? or call the add_search method? must avoid conflict here
+
+    print "The user default route fired."
+
+    this_user_id = session.get('user_id', None)                               # This will return None if the user is not logged in
+    print "default called user id:", this_user_id
+
+    if this_user_id is not None:
+        # get the new default search string from the form
+        new_default_string = request.form.get('search_string').encode('ascii', 'ignore')
+        print "default called search string:",  new_default_string
+
+        # see if this user already has a default set.
+        user_default = UserSearch.query.filter(UserSearch.user_id == this_user_id,
+                                       UserSearch.user_default == True).first()
+
+        if user_default:
+            print "user default:", user_default.search_string
+            user_default.user_default = 0
+            db.session.commit()
+        else:
+            print "no user default."
+
+
+        # see if this user already has this search saved.
+        preexisting_version = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
+                                                    UserSearch.search_string == new_default_string).first()
+        if preexisting_version:
+            print "found it!", preexisting_version.search_string
+            preexisting_version.user_default = 1
+            db.session.commit()
+        else:
+            print "Apparently you called 'default' without calling 'save', wtf."
+            print "Adding a new copy of %s to the database" %new_default_string
+            new_search = UserSearch(user_id = this_user_id, 
+                                    search_string = new_default_string, 
+                                    user_default=1, 
+                                    timestamp = datetime.utcnow())
+            db.session.add(new_search)
+            db.session.commit()
+
+
+
+    #     print "search string", json.loads(search_string)
+
+    #     if user_default is not None:
+    #         print "old default", user_default.search_string
+    #     else:
+    #         print "No existing default."
+        
+
+    return None
         
 
 ##############################################################################

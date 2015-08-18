@@ -1,7 +1,14 @@
 from model import User, Bird, Observation, connect_to_db, db
 
 def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all", family = "all", region = "all", other=None):
-	""" I take parameters from the server and return lists, lists of tuples, and lists of objects"""
+	""" 
+	I take parameters from the server and return lists, lists of tuples, and lists of objects
+
+	I should be changed so I return a complex dictionary, like this:
+	order { familya{bird1, bird2}, familyb{bird4, bird5}}
+	"""
+
+
 
 	q = Bird.query
 

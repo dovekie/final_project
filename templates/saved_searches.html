@@ -2,27 +2,27 @@
 
 {% block body %}
 	{% for this_search in search_list %}
-	
+		<div id="{{this_search}}">
 		{% for key, value in this_search.iteritems() %}
-				<form action="/search" method="POST">
-					<input hidden name="{{key}}", value="{{value[0]}}">
-				{% if value[0] != "all" and key != "save_this" and key != "fuzzy" %}
+				<form action="/search" class="form_saved" method="POST">
+					<input hidden name="{{key}}", value="{{value}}">
+				{% if value != "all" and key != "save_this" and key != "fuzzy" %}
 					{% if key == "select_spuh" %}
 						<br>
-						<label for="{{key}}">Kind of bird: {{SPUH_EQUIVALENTS[value[0]]}}</label>
+						<label for="{{key}}">Kind of bird: {{SPUH_EQUIVALENTS[value]}}</label>
 					{% elif key == "select_order" %}
 						<br>
-						<label for="{{key}}">Order: {{value[0]}}</label>
+						<label for="{{key}}">Order: {{value}}</label>
 					{% elif key == "select_family" %}
 						<br>
-						<label for="{{key}}">Family: {{value[0]}}</label>
+						<label for="{{key}}">Family: {{value}}</label>
 					{% elif key == "select_region" %}
 						<br>
-						<label for="{{key}}">In: {{REGION_CODES[value[0]]}}</label>
+						<label for="{{key}}">In: {{REGION_CODES[value]}}</label>
 					{% elif key == "which_birds" and value[0] == "my_birds" %}
 						<br>
 						<label for="{{key}}">Seen</label>
-					{% elif key == "which_birds" and value[0] == "not_my_birds" %}
+					{% elif key == "which_birds" and value == "not_my_birds" %}
 						<br>
 						<label for="{{key}}">Not seen</label>
 					{% else %}
@@ -30,16 +30,15 @@
 					{% endif %}
 				{% endif %}
 		{% endfor %}
-		<br>
-		{% if this_search.get("set_default") == None %}
-			<label>Set default: 
-				<input type="checkbox" name="set_default" value="true"></input>
-			</label>
-		<br>
-		{% endif %}
+				<br>
 				<input type="submit" value="Run this search">
 			</form>
 			<br>
+			<label>
+				<input type="submit" class="default_set_button" value="Make this your default">
+			</label>
+			<br>
+		</div>
 	{% endfor %}
 	<a href="/search">New Search</a>
 {% endblock %}
