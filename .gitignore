@@ -2,3 +2,4 @@ env
 resources
 *.pyc
 *.db
+*.sh

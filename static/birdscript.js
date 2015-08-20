@@ -107,13 +107,35 @@ $( document ).ready( function() {
 	});
 });
 
+var bird_id;
+
 $( document ).ready( function() {
 	$(".delete_save_search").click( function() {
 		console.log("deleting! jk not really");
 	});
 
 });
-// omg map
+
+var picture_html
+$( document ).ready( function() {
+	$(".bird_picture").each( function( index_number, this_item) {
+			$.get('/bird_pictures', {'bird_id': $(this).attr('id')}, function(response) {
+				bird_gallery_data = JSON.parse(response);
+				console.log(bird_gallery_data);
+				$("#" + bird_gallery_data.id).append(bird_gallery_data.uri);
+			});
+		});
+
+});		
+
+// .done( function() {
+// 			$('#waiting').hide();
+// make bootstrap's dropdown menus work
+
+// $('.dropdown-toggle').dropdown();
+
+
+// make a google map
 
 // var map;
 

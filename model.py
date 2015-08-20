@@ -1,6 +1,7 @@
 """Models and database functions """
 
 from flask_sqlalchemy import SQLAlchemy
+# from flask.ext.login import LoginManager, UserMixin # the last two are intended to make oauth work
 
 # This is the connection to the SQLite database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -12,13 +13,14 @@ db = SQLAlchemy()
 ##############################################################################
 # Model definitions
 
-class User(db.Model):
+class User(db.Model):            # add UserMixin for oauth
     """User of the birdwatch website"""
 
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    username = db.Column(db.String(64), nullable=False, unique=True)
+    social_id = db.Column(db.String(50), nullable=False, unique=True)
+    username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=True, unique=True)
     password = db.Column(db.String(64), nullable=True)
     bird_count = db.Column(db.Integer, nullable=True)

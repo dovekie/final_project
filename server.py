@@ -5,6 +5,10 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 import json                                         # FIXME
+import requests     # FIXME
+from flask_oauth import OAuth
+import os
+import twitter
 
 from datetime import datetime
 
@@ -17,6 +21,22 @@ app = Flask(__name__)
 app.secret_key = "TINAMOU"
 
 app.jinja_env.undefined = StrictUndefined
+
+api = twitter.Api(
+    consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+    consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+    access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+    access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
+print api.VerifyCredentials()
+
+twitter = oauth.remote_app('twitter',
+    base_url='https://api.twitter.com/1/',
+    request_token_url='https://api.twitter.com/oauth/request_token',
+    access_token_url='https://api.twitter.com/oauth/access_token',
+    authorize_url='https://api.twitter.com/oauth/authenticate',
+    consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+    consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
+)
 
 # should probably move these variables to their own file.
 
@@ -109,9 +129,7 @@ def index():
 
         param_list = user_default.search_string.split("&")
 
-        print "PARAM LIST:", param_list
-
-        search_dict = {}
+        search_dict = {}        # FIXME
 
         for item in param_list:
             this = item.split("=")
@@ -129,6 +147,53 @@ def index():
         bird_dict = birdsearch()
 
     return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
+
+@app.route('/bird_gallery')
+def bird_gallery():
+
+    bird_thumbnails = []
+
+    this_user_id = 4          # FIXME
+
+    # base_url = "http://www.arkive.org/api/KjJPGXLFF6CLL5FOvk_Lx8JRvSuBJH1R1tmoGXFrYcE1/portlet/latin/%s/1"
+
+    if this_user_id is not None:
+                                                                        # get a list of the user's observations from the DB
+        bird_ids_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
+
+        bird_ids = [bird_id[0].encode('ascii', 'ignore') for bird_id in bird_ids_list]
+
+    return render_template("gallery.html", bird_ids=bird_ids)
+
+@app.route('/bird_pictures')
+def bird_pictures():
+
+    base_url = "http://www.arkive.org/api/KjJPGXLFF6CLL5FOvk_Lx8JRvSuBJH1R1tmoGXFrYcE1/portlet/latin/%s/1"
+
+    bird_request = request.args.get('bird_id').encode('ascii', 'ignore')
+    print bird_request
+
+    this_bird_id = bird_request.lstrip('photo_')
+    print "bird ID:", this_bird_id, type(this_bird_id)
+    
+    obs_list = db.session.query(Bird.sci_name).filter(Bird.taxon_id == this_bird_id).first()
+
+    bird_name = obs_list[0].encode('ascii', 'ignore')
+    print "Bird name:", bird_name
+
+    target_url = base_url %bird_name
+
+    ark_response = requests.get(target_url)
+    ark_status = ark_response.status_code
+
+    if ark_status == 200:
+        print "Arkive status 200!"
+        ark_response_data = json.dumps({'id': bird_request, 'uri': json.loads(ark_response.text)['results'][0].encode('ascii', 'ignore')})
+    else:
+        print "no bird found."
+        ark_response_data = json.dumps({'id': bird_request, 'uri': '<span></span>'}) #<img src="static/birdfill.gif"></img>
+
+    return ark_response_data
 
 @app.route('/mark_user_birds', methods=["GET"])
 def mark_birds():
@@ -379,40 +444,46 @@ def process_signup():
 
     return redirect('/')
 
-@app.route('/login', methods=["GET"])
-def show_login():
-    """
-    Render the login page
-    """
+@app.route('/login')
+def login():
+    return twitter.authorize(callback=url_for('oauth_authorized',
+        next=request.args.get('next') or request.referrer or None))
 
-    return render_template("login.html") # but I want to put this in a modal window!
+# OLD LOGIN ROUTES
+# @app.route('/login', methods=["GET"])
+# def show_login():
+#     """
+#     Render the login page
+#     """
 
-@app.route('/login', methods=["POST"])
-def process_login():
-    """
-    Login form input. Checks the username and password against the database
-    Then either sets the session variables or tells the user to try again
-    """
+#     return render_template("login.html") # but I want to put this in a modal window!
 
-    username_input = request.form.get("username")
-    password_input = request.form.get("password")
+# @app.route('/login', methods=["POST"])
+# def process_login():
+#     """
+#     Login form input. Checks the username and password against the database
+#     Then either sets the session variables or tells the user to try again
+#     """
 
-    try: 
-        user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
-        user_id_input = user_object.user_id
-    except AttributeError:
-        user_id_input = "guest"
+#     username_input = request.form.get("username")
+#     password_input = request.form.get("password")
 
-    if user_id_input is "guest":
-        flash('No such user found. Create a new account or log in.')
-        return redirect('/login')
+#     try: 
+#         user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
+#         user_id_input = user_object.user_id
+#     except AttributeError:
+#         user_id_input = "guest"
 
-    else:
-        session['username'] = username_input
-        session['password'] = password_input
-        session['user_id']  = user_id_input
+#     if user_id_input is "guest":
+#         flash('No such user found. Create a new account or log in.')
+#         return redirect('/login')
 
-        return redirect('/')
+#     else:
+#         session['username'] = username_input
+#         session['password'] = password_input
+#         session['user_id']  = user_id_input
+
+#         return redirect('/')
 
 @app.route('/logout')
 def logout():
