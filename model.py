@@ -19,8 +19,7 @@ class User(db.Model):            # add UserMixin for oauth
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    social_id = db.Column(db.String(50), nullable=False, unique=True)
-    username = db.Column(db.String(64), nullable=False)
+    username = db.Column(db.String(64), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=True, unique=True)
     password = db.Column(db.String(64), nullable=True)
     bird_count = db.Column(db.Integer, nullable=True)

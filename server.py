@@ -2,7 +2,7 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask, render_template, redirect, request, flash, session, jsonify
+from flask import Flask, render_template, redirect, request, flash, session, jsonify, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 import json                                         # FIXME
 import requests     # FIXME
@@ -29,6 +29,8 @@ api = twitter.Api(
     access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 print api.VerifyCredentials()
 
+oauth = OAuth()
+
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
@@ -37,6 +39,10 @@ twitter = oauth.remote_app('twitter',
     consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
     consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
 )
+
+@twitter.tokengetter
+def get_twitter_token(token=None):
+    return session.get('twitter_token')
 
 # should probably move these variables to their own file.
 
@@ -113,7 +119,7 @@ def index():
 
     Displays a dynamic list of bird species organized by order and family
     """
-
+    print "this is the homepage print statement"
     this_user_id = session.get('user_id')                               # if the user is logged in, this will return their ID
 
     user_default = None
@@ -446,44 +452,69 @@ def process_signup():
 
 @app.route('/login')
 def login():
+    print "in the Twitter login"
     return twitter.authorize(callback=url_for('oauth_authorized',
         next=request.args.get('next') or request.referrer or None))
 
+@app.route('/oauth-authorized')
+@twitter.authorized_handler
+def oauth_authorized(resp):
+    print "In the OAUTH function"
+    next_url = request.args.get('next') or url_for('index')
+
+    print next_url
+    if resp is None:
+        flash(u'You denied the request to sign in.')
+        return redirect(next_url)
+
+    session['twitter_token'] = (
+        resp['oauth_token'],
+        resp['oauth_token_secret']
+    )
+    session['username'] = resp['screen_name']
+    user_object = User.query.filter(User.username == session['username']).first()
+    user_id_input = user_object.user_id
+    session['user_id']  = user_id_input
+    print session
+
+    flash('You were signed in as %s' % session['username'])
+    return redirect(next_url)
+
 # OLD LOGIN ROUTES
-# @app.route('/login', methods=["GET"])
-# def show_login():
-#     """
-#     Render the login page
-#     """
+@app.route('/lek_login', methods=["GET"])
+def show_login():
+    """
+    Render the login page
+    """
 
-#     return render_template("login.html") # but I want to put this in a modal window!
+    return render_template("login.html") # but I want to put this in a modal window!
 
-# @app.route('/login', methods=["POST"])
-# def process_login():
-#     """
-#     Login form input. Checks the username and password against the database
-#     Then either sets the session variables or tells the user to try again
-#     """
+@app.route('/lek_login', methods=["POST"])
+def process_login():
+    """
+    Login form input. Checks the username and password against the database
+    Then either sets the session variables or tells the user to try again
+    """
 
-#     username_input = request.form.get("username")
-#     password_input = request.form.get("password")
+    username_input = request.form.get("username")
+    password_input = request.form.get("password")
 
-#     try: 
-#         user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
-#         user_id_input = user_object.user_id
-#     except AttributeError:
-#         user_id_input = "guest"
+    try: 
+        user_object = User.query.filter(User.username == username_input, User.password == password_input).first()
+        user_id_input = user_object.user_id
+    except AttributeError:
+        user_id_input = "guest"
 
-#     if user_id_input is "guest":
-#         flash('No such user found. Create a new account or log in.')
-#         return redirect('/login')
+    if user_id_input is "guest":
+        flash('No such user found. Create a new account or log in.')
+        return redirect('/login')
 
-#     else:
-#         session['username'] = username_input
-#         session['password'] = password_input
-#         session['user_id']  = user_id_input
+    else:
+        session['username'] = username_input
+        session['password'] = password_input
+        session['user_id']  = user_id_input
 
-#         return redirect('/')
+        return redirect('/')
 
 @app.route('/logout')
 def logout():
@@ -548,6 +579,6 @@ if __name__ == "__main__":
     connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
     app.run()
