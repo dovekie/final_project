@@ -19,12 +19,33 @@
 				<ul>
 					{% for bird in birds_nest[order][family].keys() %}
 							<li class="taxon_species">
-								<p class="species_span" id="{{bird}}">
+								<div class="species_span" id="{{bird}}">
 									<span class="common_name_span">{{ birds_nest[order][family][bird]['common_name'] }}</span>: 
 									<span class="sci_name_span">{{ birds_nest[order][family][bird]['sci_name'] }}</span>
-									Region: <span class="region_span">{{ birds_nest[order][family][bird]['region'] }}</span>
-								</p>
+									Region: <span class="region_span">{{ birds_nest[order][family][bird]['region'] }}</span> 
+								</div>
+								<span class="species_info">INFO</span>
+
+								<div class="modal fade" id="{{bird}}_modal">
+								  <div class="modal-dialog">
+								    <div class="modal-content">
+								      <div class="modal-header">
+								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								        <h4 class="modal-title">{{birds_nest[order][family][bird]['common_name']}}</h4>
+								      </div>
+								      <div class="modal-body" id="{{bird}}_modal_body">
+								        <p>{{ birds_nest[order][family][bird]['sci_name'] }}&hellip;</p>
+								      </div>
+								      <div class="modal-footer">
+								        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								        <button type="button" class="btn btn-primary">Save changes</button>
+								      </div>
+								    </div><!-- /.modal-content -->
+								  </div><!-- /.modal-dialog -->
+								</div><!-- /.modal -->
+
 							</li>
+							<br>
 					{% endfor %}
 				</ul>
 		{% endfor %}

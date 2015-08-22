@@ -26,7 +26,7 @@ $( document ).ready( function() {
 // Send that user's info and bird info to the database
 $( document ).ready( function() {
 	console.log("New bird marker is ready!")
-	$( "p.species_span" ).click(function() {
+	$( "div.species_span" ).click(function() {
 	  $( this ).toggleClass("highlight");  				// mark the new bird
 
 	  var birdcount_update = $("#bird_counter").html() // get the value that was placed inside the bird counter
@@ -111,7 +111,12 @@ var bird_id;
 
 $( document ).ready( function() {
 	$(".delete_save_search").click( function() {
-		console.log("deleting! jk not really");
+		$.ajax("/delete_search", {
+		    	method: "POST",
+		    	data: {'search_string': $(this).closest('div').children('form').serialize()}
+		    }).done( function() {
+		    	console.log("Victory!");
+		    });
 	});
 
 });
@@ -128,11 +133,21 @@ $( document ).ready( function() {
 
 });		
 
-// .done( function() {
-// 			$('#waiting').hide();
-// make bootstrap's dropdown menus work
 
-// $('.dropdown-toggle').dropdown();
+$( document ).ready( function () {
+	$( ".species_info" ).click( function( evt ) {
+		console.log( "Species info! " + evt );
+		console.log( $( this ).parent( 'li' ).children( '.species_span' ).attr( 'id' ));
+		var modal_id = $( this ).parent( 'li' ).children( '.species_span' ).attr( 'id' ) + "_modal";
+		console.log($(this).children());
+			// $.get('/bird_pictures', {'bird_id': $(this).parent('li').children('.species_span').attr('id')}, function(response) {
+			// 	bird_gallery_data = JSON.parse(response);
+			// 	console.log(bird_gallery_data);
+			// 	$("#"+modal_id+"_body").append(bird_gallery_data.uri);
+			// });
+		$( "#"+modal_id ).modal();
+	});
+});
 
 
 // make a google map

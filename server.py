@@ -22,22 +22,32 @@ app.secret_key = "TINAMOU"
 
 app.jinja_env.undefined = StrictUndefined
 
-api = twitter.Api(
+try:
     consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
     consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
     access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
-    access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
-print api.VerifyCredentials()
+    access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET']
+except KeyError:
+    from sos import *
+
+
+api = twitter.Api(
+    consumer_key=consumer_key,
+    consumer_secret=consumer_secret,
+    access_token_key=access_token_key,
+    access_token_secret=access_token_secret)
+# print api.VerifyCredentials()
 
 oauth = OAuth()
 
+# move this into the "tweet this bird" route
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
     access_token_url='https://api.twitter.com/oauth/access_token',
     authorize_url='https://api.twitter.com/oauth/authenticate',
-    consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
-    consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
+    consumer_key=consumer_key,
+    consumer_secret=consumer_secret
 )
 
 @twitter.tokengetter
@@ -119,38 +129,32 @@ def index():
 
     Displays a dynamic list of bird species organized by order and family
     """
-    print "this is the homepage print statement"
-    this_user_id = session.get('user_id')                               # if the user is logged in, this will return their ID
 
-    user_default = None
+    this_user_id = session.get('user_id', None)                               # if the user is logged in, this will return their ID
 
-    if this_user_id: # use the user's presets for birdsearch if they have any
+    if this_user_id is None:
+        print "no default: user not logged in"
+        bird_dict = birdsearch()
+    else:
         user_default = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
                                                    UserSearch.user_default == True).first()
-    if this_user_id and user_default:
-        print "default?", user_default.search_string
-
         if user_default:
-            print "found search list.", user_default
+            param_list = user_default.search_string.split("&")
 
-        param_list = user_default.search_string.split("&")
+            search_dict = {param.split("=")[0]: param.split("=")[1] for param in param_list}
+            
+            print "user default search>>>", search_dict
 
-        search_dict = {}        # FIXME
-
-        for item in param_list:
-            this = item.split("=")
-            search_dict[this[0]] = this[1]
-        
-        print search_dict
-
-        bird_dict = birdsearch(this_user_id, 
-                              search_dict["which_birds"], 
-                              search_dict["select_spuh"], 
-                              search_dict["select_order"], 
-                              search_dict["select_family"], 
-                              search_dict["select_region"])
-    else:                                                               # otherwise, show the generic page
-        bird_dict = birdsearch()
+            bird_dict = birdsearch(this_user_id, 
+                                  search_dict["which_birds"], 
+                                  search_dict["select_spuh"], 
+                                  search_dict["select_order"], 
+                                  search_dict["select_family"], 
+                                  search_dict["select_region"])
+                                                                   # otherwise, show the generic page
+        else:
+            print "no default: user has no default set"
+            bird_dict = birdsearch()
 
     return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
 
@@ -159,15 +163,16 @@ def bird_gallery():
 
     bird_thumbnails = []
 
-    this_user_id = 4          # FIXME
+    this_user_id = session.get('user_id', None)
 
-    # base_url = "http://www.arkive.org/api/KjJPGXLFF6CLL5FOvk_Lx8JRvSuBJH1R1tmoGXFrYcE1/portlet/latin/%s/1"
-
-    if this_user_id is not None:
+    if this_user_id:
                                                                         # get a list of the user's observations from the DB
         bird_ids_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
 
         bird_ids = [bird_id[0].encode('ascii', 'ignore') for bird_id in bird_ids_list]
+    else:
+        bird_ids = []
+        flash("Please log in to view your bird gallery.")
 
     return render_template("gallery.html", bird_ids=bird_ids)
 
@@ -219,6 +224,8 @@ def mark_birds():
         obs_json = jsonify(obs_dict)                                    # make a json string for the AJAX call
 
         return obs_json
+    else:
+        return jsonify({})
 
 @app.route('/birdcount', methods=["GET"])
 def birdcount():
@@ -319,6 +326,31 @@ def add_search():
 
     return jsonify({})
 
+@app.route('/delete_search', methods=["POST"])
+def delete_search():
+
+    search_string = request.form.get('search_string').encode('ascii', 'ignore')
+    this_user_id = session.get('user_id', None)
+
+    print search_string
+
+    param_list = search_string.split("&")
+
+    print param_list
+    search_to_delete = {param.split("=")[0]: param.split("=")[1] for param in param_list}
+
+    user_searches = UserSearch.query.filter(UserSearch.user_id == this_user_id).all()
+
+    for item in user_searches:
+        item_params = item.search_string.split("&")
+        search_dict = {param.split("=")[0]: param.split("=")[1] for param in item_params}
+        if search_dict == search_to_delete:
+            print "deleting:", search_dict
+            db.session.delete(item)
+            db.session.commit()
+
+    return jsonify({})
+
 @app.route('/saved_searches', methods=["GET"])
 def show_saved_searches():
     """
@@ -403,22 +435,52 @@ def change_default():
                                     timestamp = datetime.utcnow())
             db.session.add(new_search)
             db.session.commit()
-
-
-
-    #     print "search string", json.loads(search_string)
-
-    #     if user_default is not None:
-    #         print "old default", user_default.search_string
-    #     else:
-    #         print "No existing default."
         
 
-    return None
+    return jsonify({})
         
 
 ##############################################################################
 # SIGNUP/LOGIN ROUTES
+
+@app.route('/login')
+def login():
+    print "in the Twitter login"
+    return twitter.authorize(callback=url_for('oauth_authorized',
+        next=request.args.get('next') or request.referrer or None))
+
+@app.route('/oauth-authorized')
+@twitter.authorized_handler
+def oauth_authorized(resp):
+
+    next_url = request.args.get('next') or url_for('index')
+
+    print next_url
+    if resp is None:
+        flash(u'You denied the request to sign in.')
+        return redirect(next_url)
+
+    session['twitter_token'] = (
+        resp['oauth_token'],
+        resp['oauth_token_secret']
+    )
+    
+    user_object = User.query.filter(User.username == resp['screen_name']).first()
+
+    if user_object is None:
+        new_user = User(username = resp['screen_name'])
+        db.session.add(new_user)
+        db.session.commit()
+        user_object = User.query.filter(User.username == resp['screen_name']).first()
+
+    user_id_input = user_object.user_id
+
+    session['username'] = resp['screen_name']
+    session['user_id']  = user_id_input
+    print session
+
+    flash('You were signed in as %s' % session['username'])
+    return redirect(next_url)
 
 @app.route('/signup', methods=["GET"])
 def show_signup():
@@ -448,37 +510,7 @@ def process_signup():
     db.session.commit()
     flash('New account created! Please log in.')
 
-    return redirect('/')
-
-@app.route('/login')
-def login():
-    print "in the Twitter login"
-    return twitter.authorize(callback=url_for('oauth_authorized',
-        next=request.args.get('next') or request.referrer or None))
-
-@app.route('/oauth-authorized')
-@twitter.authorized_handler
-def oauth_authorized(resp):
-    print "In the OAUTH function"
-    next_url = request.args.get('next') or url_for('index')
-
-    print next_url
-    if resp is None:
-        flash(u'You denied the request to sign in.')
-        return redirect(next_url)
-
-    session['twitter_token'] = (
-        resp['oauth_token'],
-        resp['oauth_token_secret']
-    )
-    session['username'] = resp['screen_name']
-    user_object = User.query.filter(User.username == session['username']).first()
-    user_id_input = user_object.user_id
-    session['user_id']  = user_id_input
-    print session
-
-    flash('You were signed in as %s' % session['username'])
-    return redirect(next_url)
+    return redirect('/lek_login', code=307)
 
 # OLD LOGIN ROUTES
 @app.route('/lek_login', methods=["GET"])
@@ -487,7 +519,7 @@ def show_login():
     Render the login page
     """
 
-    return render_template("login.html") # but I want to put this in a modal window!
+    return render_template("login.html")
 
 @app.route('/lek_login', methods=["POST"])
 def process_login():
