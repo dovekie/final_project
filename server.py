@@ -9,6 +9,7 @@ import requests     # FIXME
 from flask_oauth import OAuth
 import os
 import twitter
+from constants import *
 
 from datetime import datetime
 
@@ -30,93 +31,29 @@ try:
 except KeyError:
     from sos import *
 
-
 api = twitter.Api(
-    consumer_key=consumer_key,
-    consumer_secret=consumer_secret,
+    consumer_key=consumer_key, #session['twitter_token'][0],
+    consumer_secret=consumer_secret, #session['twitter_token'][1],
     access_token_key=access_token_key,
     access_token_secret=access_token_secret)
 # print api.VerifyCredentials()
 
+
 oauth = OAuth()
 
-# move this into the "tweet this bird" route
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
     access_token_url='https://api.twitter.com/oauth/access_token',
     authorize_url='https://api.twitter.com/oauth/authenticate',
     consumer_key=consumer_key,
-    consumer_secret=consumer_secret
-)
+    consumer_secret=consumer_secret)
+
 
 @twitter.tokengetter
 def get_twitter_token(token=None):
     return session.get('twitter_token')
 
-# should probably move these variables to their own file.
-
-# common names for bird orders
-SPUH_EQUIVALENTS = {'Struthioniformes' : "Ostriches",
-                    'Rheiformes' : "Rheas",
-                    'Casuariiformes' : "Cassowaries and emus",
-                    'Apterygiformes' : "Kiwis",
-                    'Tinamiformes' : "Tinamous",
-                    'Anseriformes' : "Ducks, geese, and swans",
-                    'Galliformes' : "Pheasants, quail, megapodes, curassows",
-                    'Gaviiformes' : "Loons and divers",
-                    'Podicipediformes' : "Grebes",
-                    'Phoenicopteriformes' : "Flamingos",
-                    'Sphenisciformes' : "Penguins",
-                    'Procellariiformes' : "Albatross",
-                    'Phaethontiformes' : "Tropicbirds",
-                    'Ciconiiformes' : "Storks",
-                    'Suliformes' : "Frigatebirds, gannets, and darters",
-                    'Pelecaniformes' : "Pelicans",
-                    'Accipitriformes' : "Hawks, eagles, and vultures",
-                    'Falconiformes' : "Falcons and caracaras",
-                    'Otidiformes' : "Bustards",
-                    'Mesitornithiformes' : "Mesites",
-                    'Cariamiformes' : "Seriemas",
-                    'Eurypygiformes' : "Kagus",
-                    'Gruiformes' : "Cranes",
-                    'Charadriiformes' : "Waders, gulls, and auks",
-                    'Pterocliformes' : "Sandgrouse",
-                    'Columbiformes' : "Pigeons and doves",
-                    'Psittaciformes' : "Parrots",
-                    'Musophagiformes' : "Turacos",
-                    'Opisthocomiformes' : "Hoatzin",
-                    'Cuculiformes' : "Cuckoos",
-                    'Strigiformes' : "Owls",
-                    'Caprimulgiformes' : "Nightjars, oilbirds, and potoos",
-                    'Apodiformes' : "Swifts and hummingbirds",
-                    'Coliiformes' : "Mousebirds",
-                    'Trogoniformes' : "Trogons",
-                    'Coraciiformes' : "Kingfishers, rollers, motmots, bee-eaters",
-                    'Leptosomiformes' : "Cuckoo roller",
-                    'Bucerotiformes' : "Hornbills and hoopoes",
-                    'Piciformes' : "Woodpeckers",
-                    'Passeriformes' : "Songbirds"}
-
-# rationalizing location codes
-REGION_CODES = {  "NA" : "North America",
-                  "MA" : "Middle America",
-                  "SA" : "South America",
-                  "LA" : "Latin America",
-                  "AF" : "Africa",
-                  "EU" : "Eurasia",
-                  "OR" : "South Asia",
-                  "AU" : "Australasia",
-                  "AO" : "Atlantic Ocean",
-                  "PO" : "Pacific Ocean",
-                  "IO" : "Indian Ocean",
-                  "TrO": "Tropical Ocean",
-                  "TO" : "Temperate Ocean",
-                  "NO" : "Northern Ocean",
-                  "SO" : "Southern Ocean",
-                  "AN" : "Antarctica",
-                  "So. Cone" : "Southern Cone"
-}
 
 # Housekeeping over. Now for routes.
 ##############################################################################
@@ -155,6 +92,20 @@ def index():
         else:
             print "no default: user has no default set"
             bird_dict = birdsearch()
+
+    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
+
+@app.route('/lifelist')
+def lifelist():
+    """
+    Show the user all of their birds (users who aren't logged in see all birds)
+    """
+
+    user_id = session.get('user_id', None)
+    print "lifelist user id:", user_id    
+
+    bird_dict = birdsearch(this_user_id=user_id, bird_limit = "my_birds")
+    print bird_dict["orders"]
 
     return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
 
@@ -594,6 +545,19 @@ def add_obs():
 
 
     return "Victory!"
+
+@app.route('/tweet_bird')
+def tweet_bird():
+
+    # session['twitter_token'] = (
+    #     resp['oauth_token'],
+    #     resp['oauth_token_secret']
+    # )
+
+    print session['twitter_token']
+
+    pass
+
 
 ##############################################################################
 # MAP ROUTES

@@ -16,8 +16,8 @@
 
 <body>
 
-<div class="navbar navbar-inverse navbar-static-top">
-    <div class="container">
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
         <div class="navbar-header">
             <!-- <img src="/static/logo.png"> --> <!-- logo to be added later -->
             <a class="navbar-brand" href="/">Lek: Your Life List in the Cloud</a>
@@ -38,6 +38,9 @@
                     <a href="/search">Search</a>
                 </li>
                 {% if 'username' in session.keys() %}
+                <li>
+                  <a href="/lifelist">My Life List</a>
+                </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Welcome, {{session["username"]}}
                       <span class="caret"></span>
@@ -68,7 +71,7 @@
         </div>
     </div>
 </div>
-<div class="container" id="main_page_body">
+
 
   {% with messages = get_flashed_messages() %}
       {% for message in messages %}
@@ -79,7 +82,7 @@
   {% block body %}
   PAGE GOES HERE
   {% endblock %}
-</div>
+
 
 <script src="static/birdscript.js"></script>
 

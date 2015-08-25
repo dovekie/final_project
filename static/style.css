@@ -14,15 +14,10 @@
 
 #bird_counter {
 	color: white;
-
 }
 
 .taxon_family {
 	text-indent: 1em;
-}
-
-.taxon_species {
-	list-style-type: none;
 }
 
 .sci_name_span {
@@ -35,4 +30,19 @@
 
 .bird_picture {
 
+}
+
+.jumbotron {
+	height: 700px;
+    background-image: url("bluebird.jpg");
+}
+
+.title {
+	margin-top: 200px;
+	text-align: center;
+	font-style: bold;
+}
+
+.subtitle {
+	text-align: center;
 }

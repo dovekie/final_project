@@ -1,66 +1,68 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h2>Select Search Terms:</h2>
-<form action="/search" class="form-search" method="POST">
-  <label>Show which birds?
-    <br>
-    <input type="radio" name="which_birds" value="all" checked> Show all birds.
-    <br>
-    <input type="radio" name="which_birds" value="my_birds"> Only show birds I have seen.
-    <br>
-    <input type="radio" name="which_birds" value="not_my_birds"> Only show I have not seen.
-  </label>
-  <p></p>
-  <label>Select a kind of bird:
-    <select name="select_spuh">
-        <option value="all" selected="selected"></option>
-        {% for key, value in spuh.iteritems() %}
-          <option value="{{key}}">{{ value }}</option>
-        {% endfor %}
-    </select>
-  </label>
-  <p>or</p>
-	<label>Select an order:
-		<select name="select_order">
-  		  <option value="all" selected="selected"></option>
-        {% for order in orders %}
-  		  	<option value="{{order}}">{{order}}</option>
-  			{% endfor %}
-  		</select>
-  	</label>
-  	<p>or</p>
-  	<label>Select a family:
-  		<select name="select_family">
-        <option value="all" selected="selected"></option>
-	  		{% for order in birds_nest.keys() %}
-          {% for family in birds_nest[order].keys() %}
-	  	  	<option value="{{family}}">{{family}}</option>
-          {% endfor %}
-	  		{% endfor %}
-  		</select>
- 	</label>
-  	<p>or</p>
-  	<label>Select a region:
-  		<select name="select_region">
-        <option value="all" selected="selected"></option>
-        {% for key, value in regions.iteritems() %}
-	  	  	<option value="{{key}}">{{value}}</option>
-	  		{% endfor %}
-  		</select>
-  </label>
-  <p>or</p>
-  <label>Type in this box: 
-    <input type="text" name="fuzzy" value="None">
-  </label>
-  <button class="btn btn-lg btn-primary btn-block" type="submit">Search
-        </button>
- </form>
+<div class="container" id="main_page_body">
+  <h2>Select Search Terms:</h2>
+    <div class="container" id="form-container">
+      <form action="/search" class="form-search" method="POST">
+        <label>Show which birds?
+          <br>
+          <input type="radio" name="which_birds" value="all" checked> Show all birds.
+          <br>
+          <input type="radio" name="which_birds" value="my_birds"> Only show birds I have seen.
+          <br>
+          <input type="radio" name="which_birds" value="not_my_birds"> Only show I have not seen.
+        </label>
+        <p></p>
+        <label>Select a kind of bird:
+          <select name="select_spuh">
+              <option value="all" selected="selected"></option>
+              {% for key, value in spuh.iteritems() %}
+                <option value="{{key}}">{{ value }}</option>
+              {% endfor %}
+          </select>
+        </label>
+        <p>or</p>
+      	<label>Select an order:
+      		<select name="select_order">
+      		  <option value="all" selected="selected"></option>
+            {% for order in orders %}
+      		  	<option value="{{order}}">{{order}}</option>
+      			{% endfor %}
+        	</select>
+        </label>
+        <p>or</p>
+        <label>Select a family:
+      		<select name="select_family">
+            <option value="all" selected="selected"></option>
+    	  		{% for order in birds_nest.keys() %}
+              {% for family in birds_nest[order].keys() %}
+    	  	  	<option value="{{family}}">{{family}}</option>
+              {% endfor %}
+    	  		{% endfor %}
+      		</select>
+       	</label>
+      	<p>or</p>
+      	<label>Select a region:
+      		<select name="select_region">
+            <option value="all" selected="selected"></option>
+            {% for key, value in regions.iteritems() %}
+    	  	  	<option value="{{key}}">{{value}}</option>
+    	  		{% endfor %}
+      		</select>
+        </label>
+        <p>or</p>
+        <label>Type in this box: 
+          <input type="text" name="fuzzy" value="None">
+        </label>
+        <div class="container">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </form>
+    </div>
 
-
-
- 
   <br>
+  
   <label>Save this search?
       <input type="checkbox" id="isSaveChecked" name="save_this" value="true"></input>
   </label>
@@ -69,5 +71,5 @@
       <input type="checkbox" id="isDefaultChecked" name="new_default" value="true"></input>
   </label>
   <br>
-
+</div>
 {% endblock %}

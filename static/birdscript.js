@@ -1,5 +1,21 @@
 // Manage the display of the user's bird data
-
+jQuery.fn.extend({
+    toggleText: function (a, b){
+        var that = this;
+            if (that.text() != a && that.text() != b){
+                that.text(a);
+            }
+            else
+            if (that.text() == a){
+                that.text(b);
+            }
+            else
+            if (that.text() == b){
+                that.text(a);
+            }
+        return this;
+    }
+});
 
 // When a logged-in user visits the homepage
 // mark all the birds in their life list
@@ -7,7 +23,10 @@ $( document ).ready(function() {
     console.log( "Old bird marker is ready!" );
     $.get("/mark_user_birds", function (obs_list) {
 		for (var property in obs_list) {
-			$( "#" + property ).addClass( "highlight" );
+			$( "span#" + property ).addClass( "highlight" );
+			$( "button#" + property ).toggleClass('add-bird');
+			$( "button#" + property ).toggleClass('remove-bird');
+			$( "button#" + property ).toggleText('Add This Bird', 'Remove This Bird');
 		}
 	});
 });
@@ -26,7 +45,7 @@ $( document ).ready( function() {
 // Send that user's info and bird info to the database
 $( document ).ready( function() {
 	console.log("New bird marker is ready!")
-	$( "div.species_span" ).click(function() {
+	$( "span.species_span" ).click(function() {
 	  $( this ).toggleClass("highlight");  				// mark the new bird
 
 	  var birdcount_update = $("#bird_counter").html() // get the value that was placed inside the bird counter
@@ -52,6 +71,26 @@ $( document ).ready( function() {
 					console.log("Victory! Database contacted successfully");  		// confirm in the console
 			});
 	  });
+});
+
+$( document ).ready( function() {
+	$( "button.add-bird" ).click( function() {
+		console.log("add bird button id: " + $(this).attr("id"));
+		$("#tweet-" + $(this).attr("id")).attr('href', "https://twitter.com/intent/tweet?text=Hey%20everyone!%20I%20saw%20a%20{{birds_nest[order][family][bird]['common_name']}}");
+		$("#tweet-" + $(this).attr("id")).addClass('btn-primary');
+	    $.ajax("/add_obs", {
+	    	method: "POST",
+	        datatype:"json",
+	    	data: {'count': $("#bird_counter").html(), 'bird': $(this).attr("id")} 	// Nothing uses 'count'. Yet.
+	    	}).done(function() {
+					console.log("Victory! Database contacted successfully");  		// confirm in the console
+			});
+		$(".species_span#" + $(this).attr("id")).toggleClass("highlight");
+
+		$(this).toggleClass('add-bird');
+		$(this).toggleClass('remove-bird');
+		$(this).toggleText('Add This Bird', 'Remove This Bird');
+	});
 });
 
 // Save a user search
@@ -136,15 +175,21 @@ $( document ).ready( function() {
 
 $( document ).ready( function () {
 	$( ".species_info" ).click( function( evt ) {
+
 		console.log( "Species info! " + evt );
-		console.log( $( this ).parent( 'li' ).children( '.species_span' ).attr( 'id' ));
-		var modal_id = $( this ).parent( 'li' ).children( '.species_span' ).attr( 'id' ) + "_modal";
-		console.log($(this).children());
-			// $.get('/bird_pictures', {'bird_id': $(this).parent('li').children('.species_span').attr('id')}, function(response) {
-			// 	bird_gallery_data = JSON.parse(response);
-			// 	console.log(bird_gallery_data);
-			// 	$("#"+modal_id+"_body").append(bird_gallery_data.uri);
-			// });
+		console.log( $( this ).parent( 'div' ).children( '.species_span' ).attr( 'id' ));
+
+		var modal_id = $( this ).parent( 'div' ).children( '.species_span' ).attr( 'id' ) + "_modal";
+		$("#"+modal_id+"_body").html('');
+
+
+			$.get('/bird_pictures', {'bird_id': $(this).parent('div').children('.species_span').attr('id')}, function(response) {
+				bird_gallery_data = JSON.parse(response);
+
+				console.log(bird_gallery_data);
+
+				$("#"+modal_id+"_body").append(bird_gallery_data.uri);
+			});
 		$( "#"+modal_id ).modal();
 	});
 });

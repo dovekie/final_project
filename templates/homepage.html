@@ -6,24 +6,29 @@
 
 {% block body %}
 
-<h2>Birds</h2>
-
+<div class="jumbotron">
+	<div class="container">
+		<h1 class="title">Lek</h1>
+		<h3 class="subtitle">Your Life List</h3>
+	</div>
+</div>
+<div class="container" id="main_page_body">
 {% if birds_nest == {} %}
 <h3>No birds found. <a href="/search">Search again?</a></h3>
 {% else %}
 
 	{% for order in orders %}
-		<h3 class="taxon_order" id="{{order}}">{{ order }}</h3>
+		<div class="taxon_order" id="{{order}}">{{ order }}</div>
 		{% for family in birds_nest[order].keys() %}
-			<h4 class="taxon_family" id="{{family}}">{{family}}</h4>
+			<div class="taxon_family" id="{{family}}">{{family}}</div>
 				<ul>
 					{% for bird in birds_nest[order][family].keys() %}
-							<li class="taxon_species">
-								<div class="species_span" id="{{bird}}">
+							<div class="taxon_species">
+								<span class="species_span" id="{{bird}}">
 									<span class="common_name_span">{{ birds_nest[order][family][bird]['common_name'] }}</span>: 
 									<span class="sci_name_span">{{ birds_nest[order][family][bird]['sci_name'] }}</span>
 									Region: <span class="region_span">{{ birds_nest[order][family][bird]['region'] }}</span> 
-								</div>
+								</span>
 								<span class="species_info">INFO</span>
 
 								<div class="modal fade" id="{{bird}}_modal">
@@ -31,20 +36,21 @@
 								    <div class="modal-content">
 								      <div class="modal-header">
 								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-								        <h4 class="modal-title">{{birds_nest[order][family][bird]['common_name']}}</h4>
+								        <h4 class="modal-title"><span class="modal-common-name">{{birds_nest[order][family][bird]['common_name']}}</span></h4>
+								        <div class="modal-bird-info"><span class="modal-sci-name sci_name_span">({{ birds_nest[order][family][bird]['sci_name'] }})</span></div>
 								      </div>
 								      <div class="modal-body" id="{{bird}}_modal_body">
-								        <p>{{ birds_nest[order][family][bird]['sci_name'] }}&hellip;</p>
 								      </div>
 								      <div class="modal-footer">
-								        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-								        <button type="button" class="btn btn-primary">Save changes</button>
+								        <button type="button" class="btn btn-default" data-dismiss="modal">Close Window</button>
+								        <button type="button" class="btn btn-primary add-bird" id="{{bird}}">Add This Bird</button>
+								        <a class="btn twitter-share-button" id="tweet-{{bird}}">Tweet This Bird</a> 
 								      </div>
 								    </div><!-- /.modal-content -->
 								  </div><!-- /.modal-dialog -->
 								</div><!-- /.modal -->
 
-							</li>
+							</div>
 							<br>
 					{% endfor %}
 				</ul>
@@ -52,4 +58,5 @@
 		
 	{% endfor %}
 {% endif %}
+</div>
 {% endblock %}
