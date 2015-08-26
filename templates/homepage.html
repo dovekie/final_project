@@ -27,9 +27,8 @@
 								<span class="species_span" id="{{bird}}">
 									<span class="common_name_span">{{ birds_nest[order][family][bird]['common_name'] }}</span>: 
 									<span class="sci_name_span">{{ birds_nest[order][family][bird]['sci_name'] }}</span>
-									Region: <span class="region_span">{{ birds_nest[order][family][bird]['region'] }}</span> 
 								</span>
-								<span class="species_info">INFO</span>
+								<span class="species_info"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></span>
 
 								<div class="modal fade" id="{{bird}}_modal">
 								  <div class="modal-dialog">
@@ -37,7 +36,8 @@
 								      <div class="modal-header">
 								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 								        <h4 class="modal-title"><span class="modal-common-name">{{birds_nest[order][family][bird]['common_name']}}</span></h4>
-								        <div class="modal-bird-info"><span class="modal-sci-name sci_name_span">({{ birds_nest[order][family][bird]['sci_name'] }})</span></div>
+								        <div class="modal-bird-info"><span class="modal-sci-name sci_name_span">({{ birds_nest[order][family][bird]['sci_name'] }})</span>
+								        	<div class="modal-range">Region codes: {{ birds_nest[order][family][bird]['region'] }}</div></div>
 								      </div>
 								      <div class="modal-body" id="{{bird}}_modal_body">
 								      </div>

@@ -4,7 +4,7 @@
 	position: fixed;
 	background-color: #3668A5;
 	border-color: white;
-  /*This doesn't work FIXME*/
+	font-family: 'Philosopher', sans-serif;
 }
 
 .navbar.navbar-inverse.navbar-fixed-top a {
@@ -46,19 +46,49 @@
     background-image: url("snow_geese2.png");
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+	font-family: 'Philosopher', sans-serif;
+	text-align: center;
+	color: #EBEBEB;
 }
 
 .title {
 	margin-top: 200px;
-	text-align: center;
-	font-style: bold;
 }
 
 .subtitle {
-	text-align: center;
+	font-style: bold;
+	font-size: 200%;
+}
+
+.taxon_order {
+	font-size: 200%;
+	font-style: bold;
+}
+
+.taxon_family {
+	font-size: 150%;
+	font-style: bold;
+
 }
 
 .species_span {
 	padding-left: 2em;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 125%;
 
+}
+
+.search-form-background {
+	padding-top: 70px;
+	background-image: url("snow_geese2.png");
+}
+
+.glyphicon {
+	padding-left: 0.6em;
+	color: gray;
+
+}
+
+a.menu-item {
+	color: black;
 }

@@ -109,6 +109,15 @@ def lifelist():
 
     return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
 
+@app.route('/show_all')
+def show_all():
+    """
+    Show all bird with one button click
+    """
+
+    bird_dict = birdsearch()
+    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"])
+
 @app.route('/bird_gallery')
 def bird_gallery():
 

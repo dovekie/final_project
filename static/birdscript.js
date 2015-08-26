@@ -201,6 +201,20 @@ $( document ).ready( function () {
 	});
 });
 
+// Searching!
+
+$( document ).ready( function () {
+		console.log($( "#simple-search" ).val());
+	$( "#simple-search" ).keydown( function(evt) {
+	    if (evt.keyCode == 13) {
+	        evt.preventDefault();
+			console.log($( "#simple-search" ).val());
+			var thisSearch = $( "#simple-search" ).val()
+			window.find(thisSearch);
+	    }
+	});
+});
+
 
 // make a google map
 
