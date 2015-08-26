@@ -76,8 +76,13 @@ $( document ).ready( function() {
 $( document ).ready( function() {
 	$( "button.add-bird" ).click( function() {
 		console.log("add bird button id: " + $(this).attr("id"));
-		$("#tweet-" + $(this).attr("id")).attr('href', "https://twitter.com/intent/tweet?text=Hey%20everyone!%20I%20saw%20a%20{{birds_nest[order][family][bird]['common_name']}}");
-		$("#tweet-" + $(this).attr("id")).addClass('btn-primary');
+		if ($(this).hasClass('add-bird')) {
+			$("#tweet-" + $(this).attr("id")).attr('href', "https://twitter.com/intent/tweet?text=Hey%20everyone!%20I%20saw%20a%20{{birds_nest[order][family][bird]['common_name']}}");
+			$("#tweet-" + $(this).attr("id")).addClass('btn-primary');
+		} else {
+			$("#tweet-" + $(this).attr("id")).attr('href', "");
+			$("#tweet-" + $(this).attr("id")).removeClass('btn-primary');
+		}
 	    $.ajax("/add_obs", {
 	    	method: "POST",
 	        datatype:"json",
@@ -90,6 +95,8 @@ $( document ).ready( function() {
 		$(this).toggleClass('add-bird');
 		$(this).toggleClass('remove-bird');
 		$(this).toggleText('Add This Bird', 'Remove This Bird');
+
+		console.log($(this).hasClass('add-bird'));
 	});
 });
 

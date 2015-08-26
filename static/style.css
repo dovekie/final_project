@@ -2,6 +2,13 @@
 
 .navbar {
 	position: fixed;
+	background-color: #3668A5;
+	border-color: white;
+  /*This doesn't work FIXME*/
+}
+
+.navbar.navbar-inverse.navbar-fixed-top a {
+	color: #EBEBEB;
 }
 
 #main_page_body {
@@ -9,7 +16,9 @@
 }
 
 .highlight {
-	color: blue;
+	background-image: url("feather.gif");
+	background-size: 1.8em 1em;
+	background-repeat: no-repeat;
 }
 
 #bird_counter {
@@ -34,7 +43,9 @@
 
 .jumbotron {
 	height: 700px;
-    background-image: url("bluebird.jpg");
+    background-image: url("snow_geese2.png");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
 }
 
 .title {
@@ -45,4 +56,9 @@
 
 .subtitle {
 	text-align: center;
+}
+
+.species_span {
+	padding-left: 2em;
+
 }
