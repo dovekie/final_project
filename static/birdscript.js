@@ -1,3 +1,22 @@
+//Make the twitters go
+
+// window.twttr = (function(d, s, id) {
+//   var js, fjs = d.getElementsByTagName(s)[0],
+//     t = window.twttr || {};
+//   if (d.getElementById(id)) return t;
+//   js = d.createElement(s);
+//   js.id = id;
+//   js.src = "https://platform.twitter.com/widgets.js";
+//   fjs.parentNode.insertBefore(js, fjs);
+ 
+//   t._e = [];
+//   t.ready = function(f) {
+//     t._e.push(f);
+//   };
+ 
+//   return t;
+// }(document, "script", "twitter-wjs"));
+
 // Manage the display of the user's bird data
 jQuery.fn.extend({
     toggleText: function (a, b){
@@ -77,7 +96,8 @@ $( document ).ready( function() {
 	$( "button.add-bird" ).click( function() {
 		console.log("add bird button id: " + $(this).attr("id"));
 		if ($(this).hasClass('add-bird')) {
-			$("#tweet-" + $(this).attr("id")).attr('href', "https://twitter.com/intent/tweet?text=Hey%20everyone!%20I%20saw%20a%20{{birds_nest[order][family][bird]['common_name']}}");
+			var comName = $(this).data("taxonId");
+			$("#tweet-" + $(this).attr("id")).attr('href', "https://twitter.com/intent/tweet?text=Hey%20everyone!%20I%20saw%20a%20"+comName+"&via=LekLifeList");
 			$("#tweet-" + $(this).attr("id")).addClass('btn-primary');
 		} else {
 			$("#tweet-" + $(this).attr("id")).attr('href', "");

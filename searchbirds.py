@@ -6,8 +6,9 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 	I take parameters from the server and return a list of orders and a dictionary like so:
 	dict = {order: {family_1: {birdA: {bird: data}, birdB: {bird: data}}}}
 	"""
-
+	print "birdsearch is go!"
 	q = Bird.query
+	# print "birdquery is go!"
 
 	if bird_limit != "all":
 		print "bird limit var: ", bird_limit  

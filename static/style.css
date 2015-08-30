@@ -12,7 +12,7 @@
 }
 
 #main_page_body {
-	padding-top: 70px;
+	/*padding-top: 70px;*/
 }
 
 .highlight {
@@ -51,30 +51,36 @@
 	color: #EBEBEB;
 }
 
-.title {
-	margin-top: 200px;
+.jumbotron h1 {
+	font-size: 200px;
+	text-shadow: 4px 4px 6px #3668A5;
 }
 
-.subtitle {
+.title {
+	margin-top: 150px;
+}
+
+h3.subtitle {
 	font-style: bold;
 	font-size: 200%;
+	text-shadow: 4px 4px 6px #3668A5;
 }
 
 .taxon_order {
-	font-size: 200%;
+	font-size: 35px;
 	font-style: bold;
 }
 
 .taxon_family {
-	font-size: 150%;
+	font-size: 70%;
 	font-style: bold;
 
 }
 
 .species_span {
+	font-size: 80%;
 	padding-left: 2em;
 	font-family: 'PT Sans', sans-serif;
-	font-size: 125%;
 
 }
 
@@ -84,11 +90,49 @@
 }
 
 .glyphicon {
-	padding-left: 0.6em;
+	font-size: 100%;
+	padding-left: 0.4em;
 	color: gray;
 
 }
 
-a.menu-item {
-	color: black;
+span.species_info .glyphicon {
+	font-size: 75%;
+	padding-left: 0.4em;
+	color: gray;
+
+}
+
+.dropdown-menu {
+	background-color: #3668A5;
+}
+
+.footer {
+	padding-top: 20px;
+	padding-bottom: 10px;
+	padding-left: 3em;
+	background-color: #3668A5;
+	color: #EBEBEB;
+	font-family: 'Philosopher', sans-serif;
+}
+
+.instructions {
+	font-family: 'Philosopher', sans-serif;
+	padding-bottom: 3em;
+	padding-left: -10px;
+}
+
+#gallery {
+	padding-top: 70px;
+	padding-bottom: 70px;
+}
+
+.spuh {
+	font-size: 75%;
+}
+
+.footer#alt_foot {
+	position: absolute;
+    bottom: 0;
+    width: 103%;
 }

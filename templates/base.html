@@ -6,7 +6,6 @@
     <script src="static/jquery.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js"></script>
     <script src="static/jquery.quicksearch.js"></script>
-    <!-- <link rel="stylesheet" href="static/bootstrap.css"/> -->
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css"/>
@@ -19,84 +18,84 @@
 
 <body>
 
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <!-- <img src="/static/logo.png"> --> <!-- logo to be added later -->
-            <a class="navbar-brand" href="/">Lek: Your Life List in the Cloud</a>
-        </div>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <!-- <img src="/static/logo.png"> --> <!-- logo to be added later -->
+              <a class="navbar-brand" href="/">Lek: Your Life List in the Cloud</a>
+          </div>
 
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#">Bird Count: <span id="bird_counter">
-                      {% if 'bird_count' in session.keys() %}{{session['bird_count']}}
-                      {% else %}0
-                      {% endif %}</span></a>
-                </li>
-<!--                 <li>
-                  <a href="/map">Map</a>
-                </li> -->
-                <form class="navbar-form navbar-left" role="search">
-                  <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search" id="simple-search">
-                  </div>
-                  <!-- <button type="submit" class="btn btn-default">Submit</button> -->
-                </form>
-                <li>
-                  <a href="/show_all">Show All</a>
-                </li>
-                <li>
-                    <a href="/search">Advanced Search</a>
-                </li>
-                {% if 'username' in session.keys() %}
-                <li>
-                  <a href="/lifelist">My Life List</a>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Welcome, {{session["username"]}}
-                      <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                          <a class="menu-item" href="/saved_searches">My Saved Searches</a>
-                        </li>
-                        <li>
-                          <a class="menu-item" href="/bird_gallery">My Bird Gallery</a>
-                        </li>
-                        <li>
-                            <a class="menu-item" href="/logout">Logout</a>
-                        </li>
-                    </ul>
-                </li>
+          <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right">
+                  <li>
+                      <a href="#">Bird Count: <span id="bird_counter">
+                        {% if 'bird_count' in session.keys() %}{{session['bird_count']}}
+                        {% else %}0
+                        {% endif %}</span></a>
+                  </li>
+  <!--                 <li>
+                    <a href="/map">Map</a>
+                  </li> -->
+                  <form class="navbar-form navbar-left" role="search">
+                    <div class="form-group">
+                      <input type="text" class="form-control" placeholder="Search" id="simple-search">
+                    </div>
+                    <!-- <button type="submit" class="btn btn-default">Submit</button> -->
+                  </form>
+                  <li>
+                    <a href="/show_all">Show All</a>
+                  </li>
+                  <li>
+                      <a href="/search">Advanced Search</a>
+                  </li>
+                  {% if 'username' in session.keys() %}
+                  <li>
+                    <a href="/lifelist">My Life List</a>
+                  </li>
+                  <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Welcome, {{session["username"]}}
+                        <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                          <li>
+                            <a class="menu-item" href="/saved_searches">My Saved Searches</a>
+                          </li>
+                          <li>
+                            <a class="menu-item" href="/bird_gallery">My Bird Gallery</a>
+                          </li>
+                          <li>
+                              <a class="menu-item" href="/logout">Logout</a>
+                          </li>
+                      </ul>
+                  </li>
 
-                {% else %}
-                <li>
-                    <a href="/lek_login">Log In</a>
-                </li>
-                <li>
-                    <a href="/login">Log In with Twitter</a>
-                </li>
+                  {% else %}
+                  <li>
+                      <a href="/lek_login">Log In</a>
+                  </li>
+                  <li>
+                      <a href="/login">Log In with Twitter</a>
+                  </li>
 
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</div>
+                  {% endif %}
+              </ul>
+          </div>
+      </div>
+  </div>
 
 
-  {% with messages = get_flashed_messages() %}
-      {% for message in messages %}
-          <div class="alert alert-warning">{{ message }}</div>
-      {% endfor %}
-  {% endwith %}
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
 
-  {% block body %}
-  PAGE GOES HERE
-  {% endblock %}
+    {% block body %}
+    PAGE GOES HERE
+    {% endblock %}
+
 
 
 <script src="static/birdscript.js"></script>
-
 </body>
 </html>

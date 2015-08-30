@@ -9,18 +9,18 @@
 <div class="jumbotron">
 	<div class="container">
 		<h1 class="title">Lek</h1>
-		<h3 class="subtitle">Your Life List in the Cloud</h3>
+		<h3 class="subtitle">Your Life List</h3>
 	</div>
 </div>
 <div class="container" id="main_page_body">
 {% if birds_nest == {} %}
 <h3>No birds found. <a href="/search">Search again?</a></h3>
 {% else %}
-
+<div class="instructions">Click on a bird's name to add it to your life list.<br>Click <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> for more information about a species.</div>
 	{% for order in orders %}
-		<div class="taxon_order" id="{{order}}">{{ order }}</div>
+		<div class="taxon_order" id="{{order}}">{{ order }} <span class="spuh">({{ spuh[order] }})</span>
 		{% for family in birds_nest[order].keys() %}
-			<div class="taxon_family" id="{{family}}">{{family}}</div>
+			<div class="taxon_family" id="{{family}}">{{family}}
 				<ul>
 					{% for bird in birds_nest[order][family].keys() %}
 							<div class="taxon_species">
@@ -43,7 +43,7 @@
 								      </div>
 								      <div class="modal-footer">
 								        <button type="button" class="btn btn-default" data-dismiss="modal">Close Window</button>
-								        <button type="button" class="btn btn-primary add-bird" id="{{bird}}">Add This Bird</button>
+								        <button type="button" class="btn btn-primary add-bird" id="{{bird}}" data-taxon-id="{{birds_nest[order][family][bird]['common_name']}}">Add This Bird</button>
 								        <a class="btn twitter-share-button" id="tweet-{{bird}}">Tweet This Bird</a> 
 								      </div>
 								    </div><!-- /.modal-content -->
@@ -51,12 +51,18 @@
 								</div><!-- /.modal -->
 
 							</div>
-							<br>
 					{% endfor %}
 				</ul>
+			</div>
+				
 		{% endfor %}
-		
+		</div>
 	{% endfor %}
 {% endif %}
 </div>
+    <div class="footer" id="main_foot">
+      <span class="ack">Data sources: eBird, Faircloth Labs, BirdLife, IOC World Bird Names</span>
+      <span class="copyright">Unless otherwise noted, all content and code is copyright Sarah Frost, 2015</span>
+      <span class="hackbright">Thanks to everyone from Hackbright who made this possible.</span>
+    </div>
 {% endblock %}
