@@ -23,6 +23,14 @@ Lek relies on data from many hardworking scientists:
 
 Lek is open source is open source with a [public repository](https://github.com/dovekie/final_project) on GitHub.
 
+### Screenshots
+
+![Lek homepage screengrab](https://github.com/dovekie/final_project/blob/master/screengrabs/Lek-homepage.png)
+
+![Lek saved searches screengrab](https://github.com/dovekie/final_project/blob/master/screengrabs/Lek-saved-search.png)
+
+![Lek gallery screengrab](https://github.com/dovekie/final_project/blob/master/screengrabs/Lek-gallery.png)
+
 ### Todos
 
  - Write more tests
