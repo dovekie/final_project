@@ -4,10 +4,12 @@
 
 <div class="container" id="gallery">
 	<div class="row" id="gallery-row">
-	{% for this_bird in bird_ids %}
-		<div class="thumbnail bird_picture" id="photo_{{this_bird}}">
+	{% for this_bird, bird_info in bird_ids.iteritems() %}
+		<div class="thumbnail bird_picture col-md-2" id="photo_{{this_bird}}">
+			<a href="#" title="bird"><img src="static/birdfill.gif" alt="bird" title="bird" border="0"></a>
 			<div class="caption">
-				<h3>{{this_bird}}</h3>
+				<h3>{{ bird_info[0] }}</h3>
+				<div class="sci_name_span">{{ bird_info[1] }}</div>
 			</div>
 		</div>
 

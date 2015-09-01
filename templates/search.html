@@ -2,75 +2,78 @@
 
 {% block body %}
     <div class="container-fluid" id="search-form-background">
-      <div class="container" id="seach-form-foreground">
-        <h2>Select Search Terms:</h2>
-          <form action="/search" class="form-search" method="POST">
-            <label>Show which birds?
-              <br>
-              <input type="radio" name="which_birds" value="all" checked> Show all birds.
-              <br>
-              <input type="radio" name="which_birds" value="my_birds"> Only show birds I have seen.
-              <br>
-              <input type="radio" name="which_birds" value="not_my_birds"> Only show I have not seen.
-            </label>
-            <p></p>
-            <label>Select a kind of bird:
-              <select name="select_spuh">
+      <div class="row" id="seach-form-foreground">
+        <div class="search_box col-md-6 col-md-offset-3" id="advanced_search_form">
+          <h2>Select Search Terms:</h2>
+            <form action="/search" class="form-search" method="POST">
+              <label>Show which birds?
+                <br>
+                <input type="radio" name="which_birds" value="all" checked> Show all birds.
+                <br>
+                <input type="radio" name="which_birds" value="my_birds"> Only show birds I have seen.
+                <br>
+                <input type="radio" name="which_birds" value="not_my_birds"> Only show I have not seen.
+              </label>
+              <p></p>
+              <label>Select a kind of bird: 
+                <select name="select_spuh">
+                    <option value="all" selected="selected"></option>
+                    {% for key, value in spuh.iteritems() %}
+                      <option value="{{key}}">{{ value }}</option>
+                    {% endfor %}
+                </select>
+              </label>
+              <p>or</p>
+            	<label>Select an order: 
+            		<select name="select_order">
+            		  <option value="all" selected="selected"></option>
+                  {% for order in orders %}
+            		  	<option value="{{order}}">{{order}}</option>
+            			{% endfor %}
+              	</select>
+              </label>
+              <p>or</p>
+              <label>Select a family: 
+            		<select name="select_family">
                   <option value="all" selected="selected"></option>
-                  {% for key, value in spuh.iteritems() %}
-                    <option value="{{key}}">{{ value }}</option>
-                  {% endfor %}
-              </select>
-            </label>
-            <p>or</p>
-          	<label>Select an order:
-          		<select name="select_order">
-          		  <option value="all" selected="selected"></option>
-                {% for order in orders %}
-          		  	<option value="{{order}}">{{order}}</option>
-          			{% endfor %}
-            	</select>
-            </label>
-            <p>or</p>
-            <label>Select a family:
-          		<select name="select_family">
-                <option value="all" selected="selected"></option>
-        	  		{% for order in birds_nest.keys() %}
-                  {% for family in birds_nest[order].keys() %}
-        	  	  	<option value="{{family}}">{{family}}</option>
-                  {% endfor %}
-        	  		{% endfor %}
-          		</select>
-           	</label>
-          	<p>or</p>
-          	<label>Select a region:
-          		<select name="select_region">
-                <option value="all" selected="selected"></option>
-                {% for key, value in regions.iteritems() %}
-        	  	  	<option value="{{key}}">{{value}}</option>
-        	  		{% endfor %}
-          		</select>
-            </label>
-    <!--         <p>or</p>
-            <label>Type in this box: 
-              <input type="text" name="fuzzy" value="None">
-            </label> -->
-            <div class="container">
-              <button class="btn btn-primary" type="submit">Search</button>
-            </div>
-          </form>
+          	  		{% for order in birds_nest.keys() %}
+                    {% for family in birds_nest[order].keys() %}
+          	  	  	<option value="{{family}}">{{family}}</option>
+                    {% endfor %}
+          	  		{% endfor %}
+            		</select>
+             	</label>
+            	<p>or</p>
+            	<label>Select a region: 
+            		<select name="select_region">
+                  <option value="all" selected="selected"></option>
+                  {% for key, value in regions.iteritems() %}
+          	  	  	<option value="{{key}}">{{value}}</option>
+          	  		{% endfor %}
+            		</select>
+              </label>
+      <!--         <p>or</p>
+              <label>Type in this box: 
+                <input type="text" name="fuzzy" value="None">
+              </label> -->
+              <div class="row" id="advanced_search">
+                <button class="btn btn-primary" type="submit">Search</button>
+              </div>
+            </form>
 
-          <br>
-  
-      <label>Save this search?
-          <input type="checkbox" id="isSaveChecked" name="save_this" value="true"></input>
-      </label>
-      <br>
-      <label>Make this search your new default?
-          <input type="checkbox" id="isDefaultChecked" name="new_default" value="true"></input>
-      </label>
-      <br>
-    </div>
+            <br>
+      <div class="row" id="tickboxes">
+        <label>Save this search?
+            <input type="checkbox" id="isSaveChecked" name="save_this" value="true"></input>
+        </label>
+        <br>
+        <label>Make this search your new default?
+            <input type="checkbox" id="isDefaultChecked" name="new_default" value="true"></input>
+        </label>
+        <br>
+      </div>
+      </div> <!-- close column -->
+    </div> <!-- close row -->
 </div>
     <div class="footer" id="alt_foot">
       <span class="ack">Data sources: eBird, Faircloth Labs, BirdLife, IOC World Bird Names</span>

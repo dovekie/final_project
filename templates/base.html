@@ -42,26 +42,26 @@
                     </div>
                     <!-- <button type="submit" class="btn btn-default">Submit</button> -->
                   </form>
-                  <li>
-                    <a href="/show_all">Show All</a>
-                  </li>
-                  <li>
+                  <li class="hoverable">
                       <a href="/search">Advanced Search</a>
                   </li>
-                  {% if 'username' in session.keys() %}
-                  <li>
-                    <a href="/lifelist">My Life List</a>
+                  <li class="hoverable">
+                    <a href="/show_all">Show All</a>
                   </li>
-                  <li class="dropdown">
+                  {% if 'username' in session.keys() %}
+                  <li class="dropdown hoverable">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Welcome, {{session["username"]}}
                         <span class="caret"></span>
                       </a>
-                      <ul class="dropdown-menu">
+                      <ul class="dropdown-menu" >
                           <li>
-                            <a class="menu-item" href="/saved_searches">My Saved Searches</a>
+                            <a class="menu-item" href="/saved_searches">Saved Searches</a>
                           </li>
                           <li>
-                            <a class="menu-item" href="/bird_gallery">My Bird Gallery</a>
+                            <a href="/lifelist">My Life List</a>
+                          </li>
+                          <li>
+                            <a class="menu-item" href="/bird_gallery">Bird Gallery</a>
                           </li>
                           <li>
                               <a class="menu-item" href="/logout">Logout</a>

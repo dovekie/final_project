@@ -166,7 +166,7 @@ def bird_gallery():
     """
 
     this_user_id = session.get('user_id', None)
-
+    bird_info_dict = {}
     # get a list of the user's observations from the db IDs ONLY
     if this_user_id:                                                                
         bird_ids_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
@@ -174,11 +174,15 @@ def bird_gallery():
         # Create a list of ASCII-encoded bird ids
         bird_ids = [bird_id[0].encode('ascii', 'ignore') for bird_id in bird_ids_list]
         bird_ids.sort()
+        for bird_id in bird_ids:
+            bird_info = db.session.query(Bird.common_name, Bird.sci_name).filter(Bird.taxon_id == bird_id).first()
+            bird_info_dict[bird_id] = bird_info
     else:
-        bird_ids = []
         flash("Please log in to view your bird gallery.")
 
-    return render_template("gallery.html", bird_ids=bird_ids)
+    print bird_info_dict
+
+    return render_template("gallery.html", bird_ids=bird_info_dict)
 
 @app.route('/bird_pictures')
 def bird_pictures():

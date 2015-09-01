@@ -177,13 +177,17 @@ $( document ).ready( function() {
 				if (bird_gallery_data.uri === "<span></span>") {
 					console.log('NOPE');
 				} else {
-					$("#" + bird_gallery_data.id).prepend(bird_gallery_data.uri);
-					console.log("title:" + $("#" + bird_gallery_data.id).children('a').attr('title'));
-					var arkText = $("#" + bird_gallery_data.id).children('a').attr('title')
-					var arkLabel = arkText.substr(0, 17);
-					speciesName = arkText.replace(arkLabel, '');
-					$("#" + bird_gallery_data.id).children('div').children('h3').text(speciesName);
-					// hands down the gnarliest piece of javascript I've ever written
+					var bird_id = "#" + bird_gallery_data.id;
+					console.log("Bird ID: " + bird_id);
+					console.log($(bird_id));
+					console.log($(bird_id).html());
+					console.log($(bird_id).children('a'));
+					$(bird_id).children('a').replaceWith(bird_gallery_data.uri);
+					//console.log("CHILDREN:" + $("#" + bird_gallery_data.id).children().attr('href'));//.replaceWith(bird_gallery_data.uri);
+					// console.log(bird_gallery_data.uri);
+					// $("#" + bird_gallery_data.id).prepend(bird_gallery_data.uri);
+					// $("#" + bird_gallery_data.id).children('div').children('h3').text(speciesName);
+					// hands down the gnarliest piece of javascript I've ever written. For posterity.
 					// $("#" + bird_gallery_data.id).children('div').children('h3').text($("#" + bird_gallery_data.id).children('a').attr('title'));
 				}
 			});
