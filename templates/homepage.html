@@ -12,6 +12,11 @@
 		<h3 class="subtitle">Your Life List</h3>
 	</div>
 </div>
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
 <div class="container" id="main_page_body">
 {% if birds_nest == {} %}
 <h3>No birds found. <a href="/search">Search again?</a></h3>
