@@ -111,6 +111,7 @@ span.species_info .glyphicon {
 	padding-top: 20px;
 	padding-bottom: 10px;
 	padding-left: 3em;
+	/*height: 100%;*/
 	background-color: #3668A5;
 	color: #EBEBEB;
 	font-family: 'Philosopher', sans-serif;
@@ -135,4 +136,46 @@ span.species_info .glyphicon {
 	position: absolute;
     bottom: 0;
     width: 103%;
+}
+
+.footer a {
+	color: #5CDBF9;
+}
+
+.saved {
+	padding-top: 70px;
+	font-family: 'Philosopher', sans-serif;
+	/*margin-left: 3em;*/
+	background-image: url("snow_geese2.png");
+	background-repeat: no-repeat;
+	background-size: 100%;
+}
+
+.saved_search .search_box {
+	background-color: rgba(255, 255, 255, 0.9);
+	padding-bottom: 70px;
+}
+
+.form_saved {
+	padding-top: 2em;
+	padding-bottom: 5em;
+}
+
+.form_saved label {
+	padding-left: 12em;
+	font-family: 'PT Sans', sans-serif;
+	font-weight: normal;
+	font-size: 150%;
+}
+
+.bird_picture {
+	float: left;
+}
+
+.saved_search .search_box a {
+	/*padding-left: 3em;*/
+}
+
+.saved_search .search_box .options {
+	padding-left: 3em;
 }

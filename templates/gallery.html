@@ -5,15 +5,24 @@
 <div class="container" id="gallery">
 	<div class="row" id="gallery-row">
 	{% for this_bird in bird_ids %}
-		<span class="bird_picture" id="photo_{{this_bird}}"></span>
+		<div class="thumbnail bird_picture" id="photo_{{this_bird}}">
+			<div class="caption">
+				<h3>{{this_bird}}</h3>
+			</div>
+		</div>
+
 	{% endfor %}
 	</div>
-		<!-- <center><div><img id="waiting" src="/static/loading_animation2.gif"></img></div></center> -->
 </div>
     <div class="footer" id="main_foot">
-      <span class="ack">Data sources: eBird, Faircloth Labs, BirdLife, IOC World Bird Names</span>
-      <span class="copyright">Unless otherwise noted, all content and code is copyright Sarah Frost, 2015</span>
-      <span class="hackbright">Thanks to everyone from Hackbright who made this possible.</span>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-4" id="faircloth">Gill, F &amp; D Donsker (Eds). 2014. IOC World Bird List (v 4.1). doi: <a href="http://doi.org/10.14344/IOC.ML.4.1">10.14344/IOC.ML.4.1</a>.
+			</div>
+			<div class="col-sm-4" id="ebird">eBird. 2012. eBird: An online database of bird distribution and abundance [web application]. eBird, Ithaca, New York. Available: <a href="http://www.ebird.org">http://www.ebird.org</a>.</div>
+			<div class="col-sm-4" id="arkive">ARKive API. 2010. Wildscreen Arkive. <a href="https://www.arkive.org">https://www.arkive.org</a>.</div>
+  		</div>
+  	</div>
     </div>
 
 {% endblock %}

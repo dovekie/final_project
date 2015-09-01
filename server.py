@@ -67,6 +67,17 @@ def test():
 
     This route establishes a baseline for unittests.
     """
+    
+    this_user_id = 4
+    bird_ids_list = db.session.query(Observation.bird_id).filter(Observation.user_id == this_user_id).all()
+    bird_ids = [bird_id[0].encode('ascii', 'ignore') for bird_id in bird_ids_list]
+
+    bird_info_dict = {}
+    for bird_id in bird_ids:
+        bird_info = db.session.query(Bird.common_name, Bird.sci_name).filter(Bird.taxon_id == bird_id).first()
+        bird_info_dict[bird_id] = bird_info
+
+    print bird_info_dict
 
     return "I test! I fail! I test again!"
 
@@ -374,8 +385,11 @@ def delete_search():
         search_dict = {param.split("=")[0]: param.split("=")[1] for param in item_params}
         if search_dict == search_to_delete:
             print "deleting:", search_dict
+            itemid = item.search_id
             db.session.delete(item)
             db.session.commit()
+            print db.session.query(UserSearch.search_string).filter(UserSearch.search_id == itemid).all()
+
 
     return jsonify({})
 
@@ -399,16 +413,20 @@ def show_saved_searches():
 
         # Create a list of lists, splitting each search string on &
         param_list = [this_list.search_string.split("&") for this_list in search_list]
+        for thislist in param_list:
+            print thislist, len(thislist)
         
         # Create a list of dictionaries where list[n] = {search parameter: parameter value, ...}
         final_list = []
         if param_list is not []:
             for converted_list in param_list:               # Nested for loops FIXME
-                this_dict = {}
-                for item in converted_list:
-                    this = item.split("=")
-                    this_dict[this[0]] = this[1]
-                final_list.append(this_dict)
+                if converted_list is not ['']:
+                    print "True"
+                    this_dict = {}
+                    for item in converted_list:
+                        this = item.split("=")
+                        this_dict[this[0]] = this[1]
+                    final_list.append(this_dict)
         else:
             print "The parameter list was empty."
 
@@ -435,32 +453,35 @@ def change_default():
         new_default_string = request.form.get('search_string').encode('ascii', 'ignore')
         print "default called search string:",  new_default_string
 
-        # see if this user already has a default set.
-        user_default = UserSearch.query.filter(UserSearch.user_id == this_user_id,
-                                       UserSearch.user_default == True).first()
-        # If the user already has a default set, remove its is_default flag.
-        if user_default:
-            print "user default:", user_default.search_string
-            user_default.user_default = 0
-            db.session.commit()
+        if new_default_string == '':
+            print "Empty string"
         else:
-            print "No preexisting user default found."
+            # see if this user already has a default set.
+            user_default = UserSearch.query.filter(UserSearch.user_id == this_user_id,
+                                           UserSearch.user_default == True).first()
+            # If the user already has a default set, remove its is_default flag.
+            if user_default:
+                print "user default:", user_default.search_string
+                user_default.user_default = 0
+                db.session.commit()
+            else:
+                print "No preexisting user default found."
 
-        # see if this user already has this search saved.
-        preexisting_version = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
-                                                    UserSearch.search_string == new_default_string).first()
-        if preexisting_version:
-            print "found it!", preexisting_version.search_string            # parse these FIXME
-            preexisting_version.user_default = 1
-            db.session.commit()
-        else:
-            print "Adding a new copy of %s to the database" %new_default_string
-            new_search = UserSearch(user_id = this_user_id, 
-                                    search_string = new_default_string, 
-                                    user_default=1, 
-                                    timestamp = datetime.utcnow())
-            db.session.add(new_search)
-            db.session.commit()
+            # see if this user already has this search saved.
+            preexisting_version = UserSearch.query.filter(UserSearch.user_id == this_user_id, 
+                                                        UserSearch.search_string == new_default_string).first()
+            if preexisting_version:
+                print "found it!", preexisting_version.search_string            # parse these FIXME
+                preexisting_version.user_default = 1
+                db.session.commit()
+            else:
+                print "Adding a new copy of %s to the database" %new_default_string
+                new_search = UserSearch(user_id = this_user_id, 
+                                        search_string = new_default_string, 
+                                        user_default=1, 
+                                        timestamp = datetime.utcnow())
+                db.session.add(new_search)
+                db.session.commit()
         
 
     return jsonify({})

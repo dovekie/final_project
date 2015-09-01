@@ -1,22 +1,3 @@
-//Make the twitters go
-
-// window.twttr = (function(d, s, id) {
-//   var js, fjs = d.getElementsByTagName(s)[0],
-//     t = window.twttr || {};
-//   if (d.getElementById(id)) return t;
-//   js = d.createElement(s);
-//   js.id = id;
-//   js.src = "https://platform.twitter.com/widgets.js";
-//   fjs.parentNode.insertBefore(js, fjs);
- 
-//   t._e = [];
-//   t.ready = function(f) {
-//     t._e.push(f);
-//   };
- 
-//   return t;
-// }(document, "script", "twitter-wjs"));
-
 // Manage the display of the user's bird data
 jQuery.fn.extend({
     toggleText: function (a, b){
@@ -163,10 +144,10 @@ $( document ).ready( function() {
 $( document ).ready( function() {
 	// on click, run the change_default route
 	$(".default_set_button").click( function() {
-		console.log($(this).closest('div').children('form').serialize()); // this produces the same string as form.form-search.serialize above
+		console.log($(this).parents('form').serialize()); // this produces the same string as form.form-search.serialize above  .children('form').serialize()
 		    $.ajax("/change_default", {
 		    	method: "POST",
-		    	data: {'search_string': $(this).closest('div').children('form').serialize()}
+		    	data: {'search_string': $(this).parents('form').serialize()}
 		    }).done( function() {
 		    	console.log("Victory!");
 		    });
@@ -179,7 +160,7 @@ $( document ).ready( function() {
 	$(".delete_save_search").click( function() {
 		$.ajax("/delete_search", {
 		    	method: "POST",
-		    	data: {'search_string': $(this).closest('div').children('form').serialize()}
+		    	data: {'search_string': $(this).parents('form').serialize()}
 		    }).done( function() {
 		    	console.log("Victory!");
 		    });
@@ -193,7 +174,18 @@ $( document ).ready( function() {
 			$.get('/bird_pictures', {'bird_id': $(this).attr('id')}, function(response) {
 				bird_gallery_data = JSON.parse(response);
 				console.log(bird_gallery_data);
-				$("#" + bird_gallery_data.id).append(bird_gallery_data.uri);
+				if (bird_gallery_data.uri === "<span></span>") {
+					console.log('NOPE');
+				} else {
+					$("#" + bird_gallery_data.id).prepend(bird_gallery_data.uri);
+					console.log("title:" + $("#" + bird_gallery_data.id).children('a').attr('title'));
+					var arkText = $("#" + bird_gallery_data.id).children('a').attr('title')
+					var arkLabel = arkText.substr(0, 17);
+					speciesName = arkText.replace(arkLabel, '');
+					$("#" + bird_gallery_data.id).children('div').children('h3').text(speciesName);
+					// hands down the gnarliest piece of javascript I've ever written
+					// $("#" + bird_gallery_data.id).children('div').children('h3').text($("#" + bird_gallery_data.id).children('a').attr('title'));
+				}
 			});
 		});
 
