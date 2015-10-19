@@ -42,10 +42,10 @@ class Bird(db.Model):
     taxon_id = db.Column(db.String(100), primary_key=True)
     common_name = db.Column(db.String(100), nullable=True)
     sci_name = db.Column(db.String(100), nullable=False)
-    species = db.Column(db.String(100), nullable=False)
-    genus = db.Column(db.String(100), nullable=False) 
-    family = db.Column(db.String(100), nullable=False)
-    order = db.Column(db.String(100), nullable=False)
+    sp_species = db.Column(db.String(100), nullable=False)
+    sp_genus = db.Column(db.String(100), nullable=False) 
+    sp_family = db.Column(db.String(100), nullable=False)
+    sp_order = db.Column(db.String(100), nullable=False)
     
     #location data follows. Some of these beeps might not have any!
     region = db.Column(db.String(100), nullable=True)
@@ -66,7 +66,7 @@ class Observation(db.Model):
     obs_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     bird_id = db.Column(db.Integer, db.ForeignKey('birds.taxon_id'), nullable=False)
-    timestamp = db.Column(db.Integer, nullable=False)
+    obs_timestamp = db.Column(db.Integer, nullable=False)
     #location = db.Column(something)
 
     # Define relationship to users
@@ -89,7 +89,7 @@ class UserSearch(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     search_string = db.Column(db.LargeBinary, nullable=False)
     user_default = db.Column(db.Boolean, nullable=False, default=False)
-    timestamp = db.Column(db.Integer, nullable=False)
+    search_timestamp = db.Column(db.Integer, nullable=False)
 
     # Define relationship with users
     user = db.relationship("User", backref=db.backref("usersearches", order_by=User.user_id))
@@ -101,12 +101,14 @@ class UserSearch(db.Model):
 
 ##############################################################################
 # Helper functions
+# import login string
+from sos import db_login
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
-    # Configure to use our SQLite database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///birdwatch.db'
+    # Configure to use our PostgreSQL database
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_login
     db.app = app
     db.init_app(app)
 
