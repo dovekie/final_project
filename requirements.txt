@@ -9,6 +9,7 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 oauth2==1.5.211
+psycopg2==2.6.1
 requests==2.7.0
 SQLAlchemy==1.0.8
 twitter==1.17.1

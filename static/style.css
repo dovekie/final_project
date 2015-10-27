@@ -40,7 +40,7 @@
 
 .jumbotron {
 	height: 700px;
-    background-image: url("snow_geese2.png");
+    background-image: url("snow_geese_web.jpg");
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	font-family: 'Philosopher', sans-serif;
@@ -83,7 +83,7 @@ h3.subtitle {
 
 .search-form-background {
 	padding-top: 70px;
-	background-image: url("snow_geese2.png");
+	background-image: url("snow_geese_web.jpg");
 }
 
 .glyphicon {
@@ -198,7 +198,7 @@ span.species_info .glyphicon {
 
 #seach-form-foreground {
 	padding-top: 70px;
-	background-image: url("snow_geese2.png");
+	background-image: url("snow_geese_web.jpg");
 	background-repeat: no-repeat;
 	background-size: 100%;
 	height: 2000px;

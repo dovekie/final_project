@@ -125,7 +125,7 @@ def index():
             print "Homepage rendering with no user default: User has no default set"
             bird_dict = birdsearch()
 
-    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], spuh=spuh)
+    return render_template("homepage_new.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], spuh=spuh, all_taxons = bird_dict["all_taxons"])
 
 @app.route('/lifelist')
 def lifelist():
