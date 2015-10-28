@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+
+    <script>
+      var sp_orders = {{ orders|tojson }};
+      var all_taxons = {{ all_taxons|tojson }};
+      var birds_nest = {{ birds_nest| tojson }};
+    </script>
+<div class="jumbotron">
+	<div class="container">
+		<h1 class="title">Lek</h1>
+		<h3 class="subtitle">Your Life List</h3>
+	</div>
+</div>
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+<div class="container" id="main_page_body">
+{% if birds_nest == {} %}
+<h3>No birds found. <a href="/search">Search again?</a></h3>
+{% else %}
+<div class="instructions">Click on a bird's name to add it to your life list.<br>Click <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> for more information about a species.</div>
+	<div id="bird-list">
+	</div>
+{% endif %}
+</div>
+{% endblock %}

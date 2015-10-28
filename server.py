@@ -142,7 +142,7 @@ def lifelist():
     # Call birdsearch with this user's ID and the parameter that shows their birds only.
     bird_dict = birdsearch(this_user_id=user_id, bird_limit = "my_birds")
 
-    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], spuh=spuh)
+    return render_template("homepage_new.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], all_taxons = bird_dict["all_taxons"], spuh=spuh)
 
 @app.route('/show_all')
 def show_all():
@@ -153,7 +153,7 @@ def show_all():
     spuh = SPUH_EQUIVALENTS
     # Call birdsearch with no arguments.
     bird_dict = birdsearch()
-    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], spuh=spuh)
+    return render_template("homepage_new.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], all_taxons = bird_dict["all_taxons"], spuh=spuh)
 
 @app.route('/bird_gallery')
 def bird_gallery():
@@ -324,7 +324,7 @@ def search_results():
 
 
     # use the birdsearch dictionary to render the home page
-    return render_template("homepage.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], spuh=spuh)
+    return render_template("homepage_new.html", birds_nest=bird_dict["birds_dict"], orders=bird_dict["orders"], all_taxons = bird_dict["all_taxons"], spuh=spuh)
 
 @app.route('/add_search', methods=["POST"])
 def add_search():

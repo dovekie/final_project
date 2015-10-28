@@ -1,7 +1,7 @@
 from model import User, Bird, Observation, connect_to_db, db
 #import pprint
 
-def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all", family = "all", region = "all", other=None, display_limit=50):
+def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all", family = "all", region = "all", other=None, display_limit=50, offset=None):
 	""" 
 	I take parameters from the server and return a list of orders and a dictionary like so:
 	dict = {order: {family_1: {birdA: {bird: data}, birdB: {bird: data}}}}
@@ -54,7 +54,11 @@ def birdsearch(this_user_id = None, bird_limit = "all", spuh = "all", order="all
 	# get a list of bird objects
 	birds = q.limit(display_limit).all()
 
-	all_taxons = [bird.taxon_id for bird in birds]
+	all_taxons = [{bird.taxon_id: {'order': bird.order.encode('ascii', 'ignore'), 
+								   'family': bird.family.encode('ascii', 'ignore'), 
+								   'sci_name': bird.sci_name, 'common_name': bird.common_name, 
+								   'region': bird.region}} 
+				  for bird in birds]
 
 	birds_dict = {}
 
