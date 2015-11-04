@@ -9,3 +9,5 @@ project/
 bootstrap.css
 jquery.js
 *.ini
+*.csv
+lek/
