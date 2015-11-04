@@ -11,3 +11,6 @@ jquery.js
 *.ini
 *.csv
 lek/
+postgres_schemas.txt
+static/jquery.quicksearch.js
+templates/maptemp.html

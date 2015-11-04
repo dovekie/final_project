@@ -1,4 +1,6 @@
 // Manage the display of the user's bird data
+
+
 jQuery.fn.extend({
     toggleText: function (a, b){
         var that = this;
@@ -17,10 +19,12 @@ jQuery.fn.extend({
     }
 });
 
+// Go through a pre-sorted list of orders
+// Find orders that are in the current search results
+// and push divs for those orders to the homepage.
 function makeOrderDivs() {
 	for (var i = 0; i < sp_orders.length; i++) {
 		if (sp_orders[i] in birds_nest && $('#' + sp_orders[i]).length===0){
-			console.log("test order", sp_orders[i]);
 			var orderDiv = $('<div></div>');
 			orderDiv.attr('id', sp_orders[i]);
 			orderDiv.addClass('taxon_order');
@@ -30,23 +34,21 @@ function makeOrderDivs() {
 	}
 }
 
-function makeFamilyDivs() {
-	allOrders = $(".taxon_order");
-	for (var i = 0; i < allOrders.length; i++) {
-		var thisOrder = allOrders[i];
-		var families = birds_nest[thisOrder.id];
-		for( var family in families ) {
-			if ($('#' + family).length === 0){
-				var familyDiv = $('<div></div>');
-				familyDiv.attr('id', family);
-				familyDiv.addClass('taxon_family');
-				familyDiv.text(family);
-				$("#" + thisOrder.id).append(familyDiv);
-			}
+// create all family divs on the homepage
+function makeFamilyDivs(order) {
+	var families = birds_nest[order];
+	for( var family in families ) {
+		if ($('#' + family).length === 0){
+			var familyDiv = $('<div></div>');
+			familyDiv.attr('id', family);
+			familyDiv.addClass('taxon_family');
+			familyDiv.text(family);
+			$("#" + order).append(familyDiv);
 		}
 	}
 }
 
+// Create all species divs on the homepage
 function makeSpeciesDivs() {
 
 	for ( var taxonId in all_taxons ) {
@@ -83,10 +85,11 @@ function makeSpeciesDivs() {
 		familyDiv.append(speciesDiv);
 	}
 }
+
+// If a species-span does not have a modal window attached to it,
+// this function will add one.
 function addModal(taxonId) {
-	console.log("2! modal funct", taxonId);
 	if ($('#' + taxonId).next().attr("class") !== "modal fade") {
-		console.log("3! modal if", taxonId)	
 		var birdObject = all_taxons[taxonId];
 		var modalHTML = '<div class="modal fade" id="' + taxonId + '_modal">' +
 			'<div class="modal-dialog">' +
@@ -248,6 +251,7 @@ function deleteSavedSearch() {
 	    	method: "POST",
 	    	data: {'search_string': $(this).parents('form').serialize()}
 	    }).done( function() {
+		    location.reload(true);
 	    	console.log("Victory!");
 	    });
 	});
@@ -263,15 +267,7 @@ function makeBirdGallery() {
 					console.log('No photo found');
 				} else {
 					var bird_id = "#" + bird_gallery_data.id;
-					console.log("Bird ID: " + bird_id);
-					console.log($(bird_id));
-					console.log($(bird_id).html());
-					console.log($(bird_id).children('a'));
 					$(bird_id).children('a').replaceWith(bird_gallery_data.uri);
-					//console.log("CHILDREN:" + $("#" + bird_gallery_data.id).children().attr('href'));//.replaceWith(bird_gallery_data.uri);
-					// console.log(bird_gallery_data.uri);
-					// $("#" + bird_gallery_data.id).prepend(bird_gallery_data.uri);
-					// $("#" + bird_gallery_data.id).children('div').children('h3').text(speciesName);
 					// hands down the gnarliest piece of javascript I've ever written. For posterity.
 					// $("#" + bird_gallery_data.id).children('div').children('h3').text($("#" + bird_gallery_data.id).children('a').attr('title'));
 				}
@@ -340,23 +336,27 @@ function makeBirdGallery() {
 
 
 $( document ).ready( function () {
+	// functions for the homepage
 	if ("sp_orders" in window) {
-	makeOrderDivs();
-	makeFamilyDivs();
-	makeSpeciesDivs();
-	$(".species_span").each( function(i){
-		addModal($(".species_span")[i].id)
-	});
-	markNewBird();
-	markOldBirds();
-	getBirdcount();
-	tweetBird();
+		makeOrderDivs();
+		$(".taxon_order").each( function(i){
+			makeFamilyDivs($(".taxon_order")[i].id);
+		});
+		makeSpeciesDivs();
+		$(".species_span").each( function(i){
+			addModal($(".species_span")[i].id)
+		});
+		markNewBird();
+		markOldBirds();
+		tweetBird();
+		// birdScrolling(); // Part of the infinite scroll system
+	}
+	// functions for all pages
+	makeBirdGallery();
+	deleteSavedSearch();
 	saveSearch();
 	changeDefaultSearch();
-	deleteSavedSearch();
-	// birdScrolling();
-	}
-	makeBirdGallery()
+	getBirdcount();
 
 	// event handler for modal windows
 	$( ".species_info" ).click( function( evt ) {
