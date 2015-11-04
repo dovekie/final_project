@@ -229,6 +229,18 @@ def bird_pictures():
 
     return ark_response_data
 
+@app.route('/more_birds')
+def more_birds():
+    offset = int(request.args.get('scroll_counter')) * 50
+    print offset
+
+    bird_dict = birdsearch(offset = offset)
+    send_back = dumps({'birds_nest': bird_dict["birds_dict"], 'orders': bird_dict["orders"], 'all_taxons': bird_dict["all_taxons"]})
+
+    #send_back = dumps({'offset': offset, 'statement': "it worked!"})
+
+    return send_back
+
 @app.route('/mark_user_birds', methods=["GET"])
 def mark_birds():
     """
